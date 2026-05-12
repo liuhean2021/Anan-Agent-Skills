@@ -45,7 +45,6 @@
 - [ ] `/speckit.constitution` 建立项目原则
 - [ ] 补充 `AGENTS.md` / `CLAUDE.md`
 - [ ] 确认 context7 MCP 已启用
-- [ ] agency-agents 角色已安装到 `~/.claude/agents/`
 
 ### 6.2 每个功能开始前
 
@@ -70,7 +69,7 @@
 
 - [ ] 模型与推理档位遵循当前 CLI / 仓库默认配置，MUST NOT 在工作流文档中硬编码固定模型分工
 - [ ] TDD：先写失败测试，再写实现
-- [ ] IF 需要专业判断或并行执行：使用 `agency-agents` 或外部代理编排能力，并明确文件所有权、输入上下文与验收条件
+- [ ] IF 需要专业判断或并行执行：先在 `plan.md` / `arch-review.md` 中明确判断结论；使用外部代理编排能力时，明确文件所有权、输入上下文与验收条件
 - [ ] 每完成一个原子任务，执行 `/commit-message` 生成提交信息，确认后再提交；MUST NOT 直接调用 `git commit`；提交信息格式以该技能定义为准，默认使用中文，除非用户明确要求英文
 - [ ] 踩坑立即追加写入 `memory/issues.md`
 - [ ] 架构决策立即追加写入 `memory/decisions.md`
@@ -80,7 +79,7 @@
 ### 6.4 上线前（关键 gate MUST 全过）
 
 - [ ] gitleaks Secret 扫描通过（pre-commit hook 自动触发，CI 二次校验）
-- [ ] `/review` + security-engineer 代码+安全审查通过，将结论写入 `specs/<feature-id>/review-findings.md`，修复后重审
+- [ ] `/review` 代码审查通过；安全敏感改动已追加安全专项审查，将结论写入 `specs/<feature-id>/review-findings.md`，修复后重审
 - [ ] `/qa` QA 验证通过，截图已存档（feature branch 默认 diff-aware）
 - [ ] IF 涉及前端交互需求：QA 已对照 `interaction-design.md` 及「设计引用」章节中的设计基线（在线链接或离线文件）验证关键页面结构、交互流转、状态矩阵、响应式规则；若在线链接失效，按 `../../frontend-dev-workflow/references/ref-05-visual-verification.md` 失效退化路径处理
 - [ ] IF 本次前面生成了 `/speckit.checklist`：其中阻断项已闭环

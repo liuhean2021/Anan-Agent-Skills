@@ -8,7 +8,7 @@
 
 本文档是 AI 编程代理的行为规范。加载后须遵守以下约定：
 
-- **工具维护（按需执行）**：代理在进入工具维护/升级场景，或用户明确要求时，SHOULD 检查核心工具版本（详见 `ref-02-tool-stack.md § 10.7`）；默认不在加载文档后自动升级工具。
+- **工具维护（按需执行）**：代理在进入工具维护/升级场景，或用户明确要求时，SHOULD 检查核心工具版本（详见 `ref-02-tool-stack.md § 10.6`）；默认不在加载文档后自动升级工具。
 - 规范性关键词含义：**MUST** = 强制执行；**MUST NOT** = 严禁；**SHOULD** = 强烈推荐，有正当理由可偏离；**MAY** = 可选
 - 术语定义：
   - **小功能（small change）**：单文件且非 bug fix，或 < 50 行净变更
@@ -51,7 +51,7 @@ WHEN 收到新任务时，代理 MUST 先按下表确定起始 Phase，再执行
 | 任务拆解 | `/speckit.tasks` | spec-kit | `specs/<feature-id>/tasks.md` |
 | 一致性检查 | `/speckit.analyze`（在 tasks 之后） | spec-kit | — |
 | 代码实现 | Claude 用 `/speckit.implement`；Codex 用 `$speckit-implement`；外部代理编排能力按需 | spec-kit + 外部代理编排能力 | 原子提交 |
-| 代码+安全审查 | 已安装 gstack 时执行 `/review` + security-engineer + 外部代理编排能力并行复核 + gitleaks；否则人工审查 / CI 替代 | gstack + agency + 外部代理编排能力 | `specs/<feature-id>/review-findings.md` |
+| 代码+安全审查 | 已安装 gstack 时执行 `/review`；安全敏感改动追加安全专项审查；按需使用外部代理编排能力并行复核 + gitleaks；否则人工审查 / CI 替代 | gstack + 外部代理编排能力 | `specs/<feature-id>/review-findings.md` |
 | QA 验证 | 已安装 gstack 时执行 `/qa`（feature branch 默认 diff-aware）；否则人工或 CI 验证 | gstack | `.gstack/qa-reports/` |
 | 发布 | 已安装 gstack 时执行 `/ship`；否则宿主常规发布流程 | gstack | PR + CHANGELOG |
 | 周复盘 | `/retro` | gstack | `.context/retros/` |
@@ -73,8 +73,8 @@ WHEN 收到新任务时，代理 MUST 先按下表确定起始 Phase，再执行
 | 实施前一致性分析 | Claude 用 `/speckit.analyze`；Codex 用 `$speckit-analyze` |
 | 代码实现（任务明确） | Claude 用 `/speckit.implement`；Codex 用 `$speckit-implement` |
 | 代码实现（需并行外部 agent） | 使用外部代理编排能力（例如 `/oh-my-claudecode:team`、`/oh-my-claudecode:omc-teams` 或宿主等价能力） |
-| 代码实现（需专业判断） | agency-agents 对应角色 |
-| 代码审查 | 已安装 gstack 时执行 `/review` + security-engineer + 外部代理编排能力交叉复核（按需并行）；否则人工审查 / CI 替代 |
+| 代码实现（需专业判断） | 在 `plan.md` / `arch-review.md` 中先明确判断结论；必要时使用外部代理编排能力复核 |
+| 代码审查 | 已安装 gstack 时执行 `/review`；安全敏感改动追加安全专项审查；按需使用外部代理编排能力交叉复核；否则人工审查 / CI 替代 |
 | 功能测试 | 已安装 gstack 时执行 `/qa`（feature branch 默认 diff-aware）；否则人工或 CI 验证 |
 | 发布上线 | 按 `ref-03-full-workflow.md` 的 Phase 9 发布链路执行 |
 | 问题回滚 | `git revert HEAD` + `/ship` |

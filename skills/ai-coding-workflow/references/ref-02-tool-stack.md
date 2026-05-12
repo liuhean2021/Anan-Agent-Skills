@@ -16,7 +16,6 @@ AI Coding Workflow 以 `Phase 0~10 / 5B` 为主线推进。以下工具与角色
 | 上下文层 | AGENTS.md + CLAUDE.md + memory/ | 项目记忆、AI 角色定义、架构决策 |
 | 文档层 | context7 MCP | 实时注入最新库文档，防止 API 幻觉 |
 | 需求层 | spec-kit | 规格驱动开发，需求 → 规格 → 计划 → 任务 |
-| 执行层 | agency-agents | 专业化子代理角色库（按需召唤） |
 | 外部代理层 | oh-my-claudecode | 调用 Codex / Gemini / 外部 CLI worker 并行实现或复核 |
 | 验证层 | gstack + 单元测试 | UI 验证 + 业务逻辑覆盖 |
 | 沉淀层 | ADR + Checkpoint commit | 架构决策记录，知识不流失 |
@@ -47,7 +46,7 @@ AI Coding Workflow 以 `Phase 0~10 / 5B` 为主线推进。以下工具与角色
 |------|------|
 | `spec-kit` 官方文档 / 官方仓库 | 校准 Phase 0 / 2 / 3 / 4 / 5 / 6 的规格链路顺序、核心命令与产物定义 |
 | `gstack` 官方站 / 官方仓库 | 校准 Phase 1 / 3 / 7 / 8 / 9 / 10 的评审、QA、发布、复盘类职责边界 |
-| 其他工具官方文档 / 官方仓库 | 校准 `agency-agents`、外部代理编排、`context7`、`gitleaks` 等阶段辅助能力的真实用法 |
+| 其他工具官方文档 / 官方仓库 | 校准外部代理编排、`context7`、`gitleaks` 等阶段辅助能力的真实用法 |
 
 **规则**：
 - 当本技能与上游工具当前行为存在冲突或歧义时，SHOULD 先复核上游官方文档，再回写本技能
@@ -147,33 +146,7 @@ git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/.co
 
 > spec-kit 升级分两层：先升级 CLI，再在项目内执行 `specify init --here --force --ai <your-agent>` 刷新 commands/templates/scripts。
 
-### 10.3 agency-agents 常用角色
-
-上游仓库：`https://github.com/msitarzewski/agency-agents`
-
-当前 Claude Code 推荐安装方式：在 `agency-agents` 仓库目录执行官方安装脚本。
-
-```bash
-# 初次安装 / 重装（在 agency-agents 仓库目录下执行）
-./scripts/install.sh --tool claude-code
-
-# 升级后重新安装到 Claude Code agents 目录
-git pull origin main
-./scripts/install.sh --tool claude-code
-
-# 手动方式（仅在需要拷贝单个分类时使用）
-cp engineering/*.md ~/.claude/agents/
-```
-
-| 场景 | 角色 |
-|------|------|
-| API / 数据库设计 | `engineering-backend-architect` |
-| 前端组件开发 | `engineering-frontend-developer` |
-| 安全审查 | `engineering-security-engineer`（工作流中简称 `security-engineer`） |
-| 代码复审 | `engineering-code-reviewer` |
-| 快速原型 | `engineering-rapid-prototyper` |
-
-### 10.4 其他工具
+### 10.3 其他工具
 
 | 工具 | 用法 |
 |------|------|
@@ -181,7 +154,7 @@ cp engineering/*.md ~/.claude/agents/
 | Claude Code hooks | `~/.claude/settings.json`，全局自动 lint + 会话结束提醒 |
 | AGENTS.md | 项目根目录，定义规范 + 禁止事项 + 验证命令 |
 
-### 10.5 oh-my-claudecode（OMC）
+### 10.4 oh-my-claudecode（OMC）
 
 ```bash
 # 升级
@@ -199,13 +172,13 @@ omc update                       # 升级 CLI/plugin（不刷新 CLAUDE.md/confi
 **规则：**
 - 实现阶段优先用 `team` / `omc-teams` 做并行分工，审查阶段优先用 `ask` / `ccg` 做交叉复核
 - 只有在任务可拆分、上下文边界清楚时才启用并行；否则单代理更稳
-- OMC 适合作为 Claude Code 的增强层，不替代 `spec-kit`、`gstack`、`agency-agents`
+- OMC 适合作为 Claude Code 的增强层，不替代 `spec-kit` 或 `gstack`
 
-### 10.5A 宿主 CLI 安装与 CC Switch
+### 10.4A 宿主 CLI 安装与 CC Switch
 
 `Claude Code`、`Codex CLI`、`Gemini CLI` 的安装步骤，以及 `CC Switch` 的 provider / model 切换说明，统一见 `ref-08-host-installation-and-cc-switch.md`。
 
-### 10.6 Secret 扫描（gitleaks）
+### 10.5 Secret 扫描（gitleaks）
 
 ```bash
 # 安装 / 升级
@@ -236,9 +209,9 @@ chmod +x .git/hooks/pre-commit
 - `.env` 文件 MUST 加入 `.gitignore`；MUST 提供 `.env.example` 作为模板
 - CI 流水线 MUST 同样运行 gitleaks，作为第二道防线
 
-### 10.7 工具版本检查（核心 5 件套）
+### 10.6 工具版本检查（核心 4 件套）
 
-进入工具维护/升级场景，或用户明确要求时，代理 SHOULD 检查以下 5 个工具是否需要升级。默认不在每次会话开始时自动检查或自动升级；若升级需要网络、写权限或交互确认，则按宿主环境规范处理。其他工具（Claude Code CLI、Codex CLI、Gemini CLI 等）不在该清单范围内。
+进入工具维护/升级场景，或用户明确要求时，代理 SHOULD 检查以下 4 个工具是否需要升级。默认不在每次会话开始时自动检查或自动升级；若升级需要网络、写权限或交互确认，则按宿主环境规范处理。其他工具（Claude Code CLI、Codex CLI、Gemini CLI 等）不在该清单范围内。
 
 **建议检查脚本（可并行执行）：**
 
@@ -253,9 +226,6 @@ uv tool list 2>/dev/null | grep specify-cli
 # gitleaks
 brew outdated gitleaks 2>/dev/null
 
-# agency-agents
-git -C <agency-agents-path> fetch --dry-run 2>/dev/null
-
 # oh-my-claudecode
 omc update --check 2>/dev/null
 ```
@@ -267,10 +237,9 @@ omc update --check 2>/dev/null
 | **gstack** | `/gstack-upgrade`（内置交互流程） |
 | **specify-cli** | `uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git@vX.Y.Z` |
 | **gitleaks** | `brew upgrade gitleaks` |
-| **agency-agents** | `git -C <agency-agents-path> pull origin main && <agency-agents-path>/scripts/install.sh --tool claude-code` |
 | **oh-my-claudecode** | `omc update`（安装/诊断用 `/oh-my-claudecode:omc-setup`） |
 
-> `<agency-agents-path>` 替换为实际克隆路径。gstack 升级通常带有宿主侧安装/确认流程；其余升级动作也应遵守当前宿主的权限、网络和交互约束。
+> gstack 升级通常带有宿主侧安装/确认流程；其余升级动作也应遵守当前宿主的权限、网络和交互约束。
 >
 > Codex CLI 安装写法表示“沿用同一套 gstack 安装脚本，但放到宿主等价技能目录”；若当前宿主的技能目录或加载机制不同，应按宿主规范调整路径。
 
@@ -286,6 +255,5 @@ omc update --check 2>/dev/null
 | gstack 官方仓库 | https://github.com/garrytan/gstack |
 | context7 MCP | https://github.com/upstash/context7 |
 | hooks 配置 | https://docs.anthropic.com/en/docs/claude-code |
-| agency-agents | https://github.com/msitarzewski/agency-agents |
 | oh-my-claudecode | https://github.com/Yeachan-Heo/oh-my-claudecode |
 | gitleaks | https://github.com/gitleaks/gitleaks |

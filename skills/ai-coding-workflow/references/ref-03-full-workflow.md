@@ -8,10 +8,9 @@
 
 ### 5.1 阶段主线与工具介入原则
 
-- AI Coding Workflow 以 `Phase 0~10 / 5B` 为唯一主线；`spec-kit`、`gstack`、`agency-agents`、外部代理编排能力、`context7`、`gitleaks`、`memory` 等都按阶段介入
+- AI Coding Workflow 以 `Phase 0~10 / 5B` 为唯一主线；`spec-kit`、`gstack`、外部代理编排能力、`context7`、`gitleaks`、`memory` 等都按阶段介入
 - `spec-kit` 主要提供规格、方案、任务、分析、实施骨架
 - `gstack` 主要提供方向评审、架构评审、审查、QA、发布、复盘能力
-- `agency-agents` 主要提供复杂架构、安全、性能、前端等专业判断
 - 外部代理编排能力主要用于并行实施或多模型交叉复核
 - `context7` 用于核对官方文档，避免在方案或实施阶段产生 API 幻觉
 - `gitleaks`、测试、CI、`memory/*` 等属于验证与沉淀能力，同样是工作流组成部分
@@ -21,7 +20,7 @@
 | 情况 | 介入能力 |
 |------|--------|
 | 任务列表明确、完整功能、自动执行 | `/speckit.implement` |
-| 需要专业判断（复杂架构、安全、性能） | `agency-agents` 对应角色 |
+| 需要专业判断（复杂架构、安全、性能） | `plan.md` / `arch-review.md` 明确结论；必要时用外部代理编排能力复核 |
 | 需并行调用 Codex / Gemini 分工实施 | `/oh-my-claudecode:team` 或 `/oh-my-claudecode:omc-teams` |
 | 需多模型交叉复核实现方案 | `/oh-my-claudecode:ccg` |
 | 需核对陌生库、新版本 SDK、官方 API | `context7` |
@@ -344,7 +343,7 @@ IF 功能涉及跨组件或跨页面的共享数据，THEN MUST 在规格锁定�
 
 **必做动作**：
 1. IF 任务列表明确且为完整功能，THEN Claude 执行 `/speckit.implement`，Codex 执行 `$speckit-implement`
-2. IF 需要专业判断（复杂架构、安全、性能），THEN 激活 agency-agents 对应角色
+2. IF 需要专业判断（复杂架构、安全、性能），THEN 先在 `plan.md` / `arch-review.md` 中明确判断结论；必要时使用外部代理编排能力复核方案
 3. IF 存在 `[P]` 并行任务，且已安装 `oh-my-claudecode`，THEN MAY 用以下方式接入外部 agent：
    - `/oh-my-claudecode:team "implement tasks <task-id list> with clear file ownership"`
    - `/oh-my-claudecode:omc-teams 2:codex "implement task <task-id> in <path> only"`
@@ -367,13 +366,13 @@ IF 功能涉及跨组件或跨页面的共享数据，THEN MUST 在规格锁定�
 
 **必做动作**：
 1. 执行 `/review`，审查生产级 bug（race condition、N+1、信任边界等）
-2. 同步激活 `security-engineer` 角色，审查安全漏洞（两者并行进行）
+2. IF 涉及鉴权、支付、隐私、权限、密钥、数据边界等安全敏感改动，THEN 追加安全专项审查，并将结论写入同一审查文档
 3. IF 审查范围较大、风险较高、或需要多视角交叉验证，THEN SHOULD 追加外部代理编排能力做交叉复核：
    - `/oh-my-claudecode:ccg "Review this diff: Codex 看架构/类型/测试缺口，Gemini 看可读性/UX/文档"`
    - `/oh-my-claudecode:ask codex "review this patch for correctness, edge cases, and security assumptions"`
    - `/oh-my-claudecode:ask gemini "review this diff for readability, UX regressions, and unclear naming"`
 4. gitleaks pre-commit hook 在提交时自动触发 Secret 扫描
-5. 将 `/review`、`security-engineer`、外部代理编排能力交叉复核中的有效发现统一汇总写入 `specs/<feature-id>/review-findings.md`，并标注来源
+5. 将 `/review`、安全专项审查、外部代理编排能力交叉复核中的有效发现统一汇总写入 `specs/<feature-id>/review-findings.md`，并标注来源
 6. IF 存在审查发现，THEN 修复后 MUST 重新执行本 Phase
 
 **产出物**：`specs/<feature-id>/review-findings.md`
