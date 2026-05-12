@@ -40,7 +40,7 @@ WHEN 收到新任务时，代理 MUST 先按下表确定起始 Phase，再执行
 
 | 阶段 | 命令 | 工具 | 产出文档（精确路径） |
 |------|------|------|---------|
-| 项目初始化（一次性，在项目根目录执行） | `specify init . --ai <your-agent>` | spec-kit | `.specify/` 目录 |
+| 项目初始化（一次性，在项目根目录执行） | `specify init . --integration <agent-key>` | spec-kit | `.specify/` 目录 |
 | 产品方向 | `/office-hours`（问题仍模糊时）→ `/plan-ceo-review` | gstack | `specs/<feature-id>/ceo-review.md` |
 | 需求规格 | `/speckit.specify` | spec-kit | `specs/<feature-id>/spec.md` |
 | 澄清需求 | `/speckit.clarify` | spec-kit | `specs/<feature-id>/spec.md`（追加） |
@@ -72,7 +72,7 @@ WHEN 收到新任务时，代理 MUST 先按下表确定起始 Phase，再执行
 | 拆解任务 | Claude 用 `/speckit.tasks`；Codex 用 `$speckit-tasks` |
 | 实施前一致性分析 | Claude 用 `/speckit.analyze`；Codex 用 `$speckit-analyze` |
 | 代码实现（任务明确） | Claude 用 `/speckit.implement`；Codex 用 `$speckit-implement` |
-| 代码实现（需并行外部 agent） | 使用外部代理编排能力（例如 `/oh-my-claudecode:team`、`/oh-my-claudecode:omc-teams` 或宿主等价能力） |
+| 代码实现（需并行外部 agent） | 使用外部代理编排能力（例如 `/team`、`omc team N:codex "..."`、`/omc-teams` 兼容入口或宿主等价能力） |
 | 代码实现（需专业判断） | 在 `plan.md` / `arch-review.md` 中先明确判断结论；必要时使用外部代理编排能力复核 |
 | 代码审查 | 已安装 gstack 时执行 `/review`；安全敏感改动追加安全专项审查；按需使用外部代理编排能力交叉复核；否则人工审查 / CI 替代 |
 | 功能测试 | 已安装 gstack 时执行 `/qa`（feature branch 默认 diff-aware）；否则人工或 CI 验证 |

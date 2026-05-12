@@ -41,7 +41,7 @@
 
 ### 6.1 项目启动（一次性）
 
-- [ ] `specify init . --ai <your-agent>` 初始化 spec-kit（Codex CLI 常用 `--ai codex --ai-skills`）
+- [ ] `specify init . --integration <agent-key>` 初始化 spec-kit（Codex CLI 常用 `--integration codex --integration-options="--skills"`）
 - [ ] `/speckit.constitution` 建立项目原则
 - [ ] 补充 `AGENTS.md` / `CLAUDE.md`
 - [ ] 确认 context7 MCP 已启用

@@ -100,7 +100,7 @@ Phase 10 复盘
 **执行顺序**：
 
 **A0 项目初始化**（一次性）  
-`specify init . --ai <your-agent>` → 执行 constitution → 补写 `AGENTS.md` / `CLAUDE.md`
+`specify init . --integration <agent-key>` → 执行 constitution → 补写 `AGENTS.md` / `CLAUDE.md`
 
 **A1 产品方向**  
 默认先用 `/office-hours` 梳理问题空间，再执行 `/plan-ceo-review`，确认 MVP 边界。若新项目方向已被合同、上级决策、既有 PRD、客户需求等外部约束锁定，则可走 **Phase 1 简版**：跳过 `/office-hours`，直接执行 `/plan-ceo-review`，并在 `ceo-review.md` 中写明“方向已锁定的依据”与“本次不再讨论的范围”。将结论写入 `specs/<feature-id>/ceo-review.md`。
@@ -198,9 +198,9 @@ Phase 9：发布（按 Phase 9 发布链路执行；未安装 gstack 时走宿�
 |------|---------|
 | gstack | `/gstack-upgrade` |
 | specify-cli（CLI） | `uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git@vX.Y.Z` |
-| spec-kit 项目文件 | `specify init --here --force --ai <your-agent>` |
+| spec-kit 项目文件 | `specify init --here --force --integration <agent-key>` |
 | gitleaks | `brew upgrade gitleaks` |
-| oh-my-claudecode | `omc update`（升级 CLI/plugin）；刷新 config 需另跑 `/oh-my-claudecode:omc-setup` |
+| oh-my-claudecode | `omc update` 或 `npm i -g oh-my-claude-sisyphus@latest`；刷新 config 需另跑 `omc setup`、`/setup` 或 `/omc-setup` |
 
 进入场景 E 或用户明确要求时，代理 SHOULD 按 `§ 10.6` 检查核心工具版本；默认不在每次会话开始时自动升级工具。
 
@@ -224,9 +224,9 @@ cd ../project-feature-b && claude
 
 | 场景 | 方案 |
 |------|------|
-| 同一任务内多模型分工实现 | `/oh-my-claudecode:team`（或宿主等价团队编排能力） |
-| 启动 Codex / Gemini CLI worker | `/oh-my-claudecode:omc-teams`（或宿主等价 worker 编排能力） |
-| 同一 diff 多模型交叉审查 | `/oh-my-claudecode:ccg`（或宿主等价交叉评审能力） |
+| 同一任务内多模型分工实现 | `/team`（Claude Code 会话内团队编排）或宿主等价能力 |
+| 启动 Codex / Gemini CLI worker | `omc team N:codex "..."` / `omc team N:gemini "..."`；`/omc-teams` 为兼容入口 |
+| 同一 diff 多模型交叉审查 | `/ccg` 或 `/ask codex` + `/ask gemini`（或宿主等价交叉评审能力） |
 | 并行功能开发 | 多个独立代理实例（各自 worktree） |
 
 ---

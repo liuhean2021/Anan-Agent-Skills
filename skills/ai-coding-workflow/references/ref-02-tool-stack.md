@@ -12,9 +12,9 @@ AI Coding Workflow 以 `Phase 0~10 / 5B` 为主线推进。以下工具与角色
 
 | 层级 | 工具 | 职责 |
 |------|------|------|
-| 基础环境层 | Claude Code 原生 hooks | 自动化质量卡口、事件触发命令 |
+| 基础环境层 | Claude Code 原生 hooks | 自动化质量卡口、事件触发命令或 prompt/agent/http/mcp_tool handler |
 | 上下文层 | AGENTS.md + CLAUDE.md + memory/ | 项目记忆、AI 角色定义、架构决策 |
-| 文档层 | context7 MCP | 实时注入最新库文档，防止 API 幻觉 |
+| 文档层 | Context7 CLI + Skills / MCP | 实时注入最新库文档，防止 API 幻觉 |
 | 需求层 | spec-kit | 规格驱动开发，需求 → 规格 → 计划 → 任务 |
 | 外部代理层 | oh-my-claudecode | 调用 Codex / Gemini / 外部 CLI worker 并行实现或复核 |
 | 验证层 | gstack + 单元测试 | UI 验证 + 业务逻辑覆盖 |
@@ -33,8 +33,8 @@ AI Coding Workflow 以 `Phase 0~10 / 5B` 为主线推进。以下工具与角色
 ### 2.3 OMC 接入原则
 
 - `oh-my-claudecode` SHOULD 作为 Claude Code 的外部代理编排层，而不是替代主代理；在其他宿主中，文档内同类命令表示“外部代理编排能力”，可用宿主等价入口替代
-- 代码实现阶段，IF 任务可拆成彼此独立的子任务，THEN MAY 用 `/oh-my-claudecode:team` 或 `/oh-my-claudecode:omc-teams` 并行调用 Codex / Gemini
-- 代码审查阶段，IF 需要交叉验证架构、安全、可读性或 UX 风险，THEN SHOULD 追加 `/oh-my-claudecode:ccg` 或 `/oh-my-claudecode:ask <model>`
+- 代码实现阶段，IF 任务可拆成彼此独立的子任务，THEN MAY 用 `/team` 或 `omc team ...` 并行调用 Codex / Gemini
+- 代码审查阶段，IF 需要交叉验证架构、安全、可读性或 UX 风险，THEN SHOULD 追加 `/ccg`、`/ask <model>` 或 `omc ask <model> ...`
 - OMC 外部 agent 输出 MUST 视为"辅助结论"，最终是否采纳 MUST 由当前 Claude Code 主代理结合测试、审查结果和人工判断统一裁决
 - 外部 agent 只应接收完成任务所需的最小上下文；敏感信息边界仍受 Section 3：AI 治理（ref-04）约束
 
@@ -70,14 +70,14 @@ uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
 uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git@vX.Y.Z
 
 # 一次性使用（无需安装）
-uvx --from git+https://github.com/github/spec-kit.git@vX.Y.Z specify init . --ai <your-agent>
+uvx --from git+https://github.com/github/spec-kit.git@vX.Y.Z specify init . --integration <agent-key>
 
 # 项目初始化（一次性）
-specify init . --ai <your-agent>                          # 在当前目录初始化
-specify init --here --ai <your-agent>                     # 等价写法
-specify init . --ai <your-agent> --force                  # 强制合并，跳过确认
-specify init . --ai codex --ai-skills                     # Codex CLI 常用写法：同时安装 agent skills
-specify init . --ai <your-agent> --branch-numbering timestamp  # 时间戳分支编号（分布式团队推荐，避免编号冲突）
+specify init . --integration <agent-key>                          # 在当前目录初始化
+specify init --here --integration <agent-key>                     # 等价写法
+specify init . --integration <agent-key> --force                  # 强制合并，跳过确认
+specify init . --integration codex --integration-options="--skills"  # Codex CLI 常用写法：同时安装 agent skills
+specify init . --integration <agent-key> --branch-numbering timestamp  # 时间戳分支编号（分布式团队推荐，避免编号冲突）
 specify check                                       # 验证工具是否就绪
 specify status                                      # 查看当前 feature 状态（v0.3.1+）
 specify doctor                                      # 项目健康诊断（v0.3.0+）
@@ -92,7 +92,7 @@ specify doctor                                      # 项目健康诊断（v0.3.
 /speckit.analyze                 # 跨文档一致性分析（tasks 后、implement 前运行）
 /speckit.implement               # 执行实现
 
-# Codex CLI 语法（--ai-skills 模式，与 /speckit.* 等价）
+# Codex CLI 语法（skills integration 模式，与 /speckit.* 等价）
 $speckit-constitution / $speckit-specify / $speckit-clarify / $speckit-checklist / $speckit-plan / $speckit-tasks / $speckit-analyze / $speckit-implement
 
 # Extensions：扩展新能力（Jira/Linear/Azure DevOps/代码审查等）
@@ -115,10 +115,10 @@ specify preset remove <name>         # 卸载预设
 ### 10.2 gstack
 
 ```bash
-# 初始安装（Claude Code）
+# 初始安装（Claude Code；需先安装 Claude Code、Git、Bun）
 git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/.claude/skills/gstack && cd ~/.claude/skills/gstack && ./setup
 
-# 初始安装（Codex CLI / 宿主等价路径）
+# 初始安装（Codex CLI / 宿主等价路径；需先安装 Git、Bun）
 git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/.codex/skills/gstack && cd ~/.codex/skills/gstack && ./setup
 
 # 升级
@@ -144,33 +144,41 @@ git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/.co
 /retro                           # 周复盘
 ```
 
-> spec-kit 升级分两层：先升级 CLI，再在项目内执行 `specify init --here --force --ai <your-agent>` 刷新 commands/templates/scripts。
+> spec-kit 升级分两层：先升级 CLI，再在项目内执行 `specify init --here --force --integration <agent-key>` 刷新 commands/templates/scripts。Codex skills 模式使用 `--integration codex --integration-options="--skills"`。
 
 ### 10.3 其他工具
 
 | 工具 | 用法 |
 |------|------|
-| context7 MCP | 提示词末尾加 `use context7`，获取最新库文档，防止 API 幻觉 |
-| Claude Code hooks | `~/.claude/settings.json`，全局自动 lint + 会话结束提醒 |
+| Context7 | 优先用 `npx ctx7 setup` 安装 CLI + Skills 或 MCP；提示词末尾加 `use context7`，或指定库 ID 如 `use library /vercel/next.js` |
+| Context7 MCP | 手动配置时使用 `https://mcp.context7.com/mcp`，API key 推荐通过 `CONTEXT7_API_KEY` header 提供 |
+| Claude Code hooks | 用户级 `~/.claude/settings.json`、项目级 `.claude/settings.json`、本地 `.claude/settings.local.json`；handler 可为 `command`、`prompt`、`agent`、`http`、`mcp_tool` |
 | AGENTS.md | 项目根目录，定义规范 + 禁止事项 + 验证命令 |
 
 ### 10.4 oh-my-claudecode（OMC）
 
 ```bash
 # 升级
-omc update                       # 升级 CLI/plugin（不刷新 CLAUDE.md/config）
-/oh-my-claudecode:omc-setup      # 安装、刷新 CLAUDE.md/config、诊断、MCP 配置
+npm i -g oh-my-claude-sisyphus@latest  # npm 安装方式；包名与项目品牌名不同
+omc update                             # 检查并安装更新
+omc update --check                     # 仅检查更新，不安装
+omc setup                              # 安装/刷新 hooks、agents、skills 等配置
+/setup 或 /omc-setup                   # Claude Code 会话内 setup 入口
 
 # 使用命令
-/oh-my-claudecode:ask codex "review this patch for security and correctness"
-/oh-my-claudecode:ask gemini "review this UI diff for UX and clarity"
-/oh-my-claudecode:ccg "Codex 看架构与安全，Gemini 看可读性与交互"
-/oh-my-claudecode:team "implement tasks T1,T2 with clear ownership"
-/oh-my-claudecode:omc-teams 2:codex "analyze backend risks and propose fixes"
+omc ask codex "review this patch for security and correctness"
+omc team 2:codex "review auth flow"
+omc team 1:codex,1:gemini "compare approaches"
+/ask codex "review this patch for security and correctness"
+/ccg "Codex 看架构与安全，Gemini 看可读性与交互"
+/team 3:executor "implement tasks T1,T2 with clear ownership"
+/omc-teams 2:codex "analyze backend risks and propose fixes"
 ```
 
 **规则：**
-- 实现阶段优先用 `team` / `omc-teams` 做并行分工，审查阶段优先用 `ask` / `ccg` 做交叉复核
+- 实现阶段优先用 `/team` 做 Claude Code 会话内团队编排；明确要启动 tmux CLI worker 时用 `omc team ...`
+- `/omc-teams` 是兼容入口，当前应理解为路由到 CLI-first `omc team ...` runtime
+- 审查阶段优先用 `ask` / `ccg` 做交叉复核
 - 只有在任务可拆分、上下文边界清楚时才启用并行；否则单代理更稳
 - OMC 适合作为 Claude Code 的增强层，不替代 `spec-kit` 或 `gstack`
 
@@ -188,7 +196,7 @@ brew upgrade gitleaks       # 升级到最新版本
 # 配置 pre-commit hook（项目根目录）
 cat > .git/hooks/pre-commit << 'EOF'
 #!/bin/sh
-gitleaks protect --staged --no-banner
+gitleaks git --pre-commit --staged --no-banner
 if [ $? -ne 0 ]; then
   echo "Secret 扫描失败，提交已阻断。请检查是否有密钥泄露。"
   exit 1
@@ -220,14 +228,16 @@ chmod +x .git/hooks/pre-commit
 ~/.claude/skills/gstack/bin/gstack-update-check --force 2>/dev/null
 ~/.codex/skills/gstack/bin/gstack-update-check --force 2>/dev/null
 
-# specify-cli（对比 PyPI 最新版）
+# specify-cli（官方来自 GitHub tag，勿用 PyPI 同名包）
 uv tool list 2>/dev/null | grep specify-cli
+specify version 2>/dev/null
 
 # gitleaks
 brew outdated gitleaks 2>/dev/null
 
-# oh-my-claudecode
+# oh-my-claudecode（npm 包名为 oh-my-claude-sisyphus）
 omc update --check 2>/dev/null
+npm view oh-my-claude-sisyphus version 2>/dev/null
 ```
 
 **升级命令（检测到更新时自动执行）：**
@@ -237,7 +247,7 @@ omc update --check 2>/dev/null
 | **gstack** | `/gstack-upgrade`（内置交互流程） |
 | **specify-cli** | `uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git@vX.Y.Z` |
 | **gitleaks** | `brew upgrade gitleaks` |
-| **oh-my-claudecode** | `omc update`（安装/诊断用 `/oh-my-claudecode:omc-setup`） |
+| **oh-my-claudecode** | `omc update` 或 `npm i -g oh-my-claude-sisyphus@latest`（安装/诊断用 `omc setup`、`/setup` 或 `/omc-setup`） |
 
 > gstack 升级通常带有宿主侧安装/确认流程；其余升级动作也应遵守当前宿主的权限、网络和交互约束。
 >
@@ -253,7 +263,8 @@ omc update --check 2>/dev/null
 | spec-kit 官方 Quick Start | https://github.github.com/spec-kit/quickstart.html |
 | gstack 官方站 | https://gstacks.org/ |
 | gstack 官方仓库 | https://github.com/garrytan/gstack |
-| context7 MCP | https://github.com/upstash/context7 |
-| hooks 配置 | https://docs.anthropic.com/en/docs/claude-code |
+| Context7 | https://github.com/upstash/context7 |
+| Context7 安装文档 | https://context7.com/docs/installation |
+| hooks 配置 | https://code.claude.com/docs/en/hooks |
 | oh-my-claudecode | https://github.com/Yeachan-Heo/oh-my-claudecode |
 | gitleaks | https://github.com/gitleaks/gitleaks |

@@ -21,8 +21,8 @@
 |------|--------|
 | 任务列表明确、完整功能、自动执行 | `/speckit.implement` |
 | 需要专业判断（复杂架构、安全、性能） | `plan.md` / `arch-review.md` 明确结论；必要时用外部代理编排能力复核 |
-| 需并行调用 Codex / Gemini 分工实施 | `/oh-my-claudecode:team` 或 `/oh-my-claudecode:omc-teams` |
-| 需多模型交叉复核实现方案 | `/oh-my-claudecode:ccg` |
+| 需并行调用 Codex / Gemini 分工实施 | `/team`、`omc team N:codex "..."` 或 `/omc-teams` 兼容入口 |
+| 需多模型交叉复核实现方案 | `/ccg`、`/ask <model>` 或 `omc ask <model> ...` |
 | 需核对陌生库、新版本 SDK、官方 API | `context7` |
 
 ### 5.2 全流程（Phase 0 ~ Phase 10）
@@ -34,7 +34,7 @@
 **进入条件**：WHEN 项目为全新项目，且尚未执行过 `specify init`。
 
 **必做动作**：
-1. 执行 `specify init . --ai <your-agent>`（分布式团队可加 `--branch-numbering timestamp` 避免分支编号冲突；Codex CLI 常用 `--ai codex --ai-skills`），初始化 `.specify/` 目录
+1. 执行 `specify init . --integration <agent-key>`（分布式团队可加 `--branch-numbering timestamp` 避免分支编号冲突；Codex CLI 常用 `--integration codex --integration-options="--skills"`），初始化 `.specify/` 目录
 2. 执行 `/speckit.constitution`，生成 `constitution.md`
 3. 补充 `AGENTS.md` / `CLAUDE.md`，写入项目规范
 
@@ -345,9 +345,9 @@ IF 功能涉及跨组件或跨页面的共享数据，THEN MUST 在规格锁定�
 1. IF 任务列表明确且为完整功能，THEN Claude 执行 `/speckit.implement`，Codex 执行 `$speckit-implement`
 2. IF 需要专业判断（复杂架构、安全、性能），THEN 先在 `plan.md` / `arch-review.md` 中明确判断结论；必要时使用外部代理编排能力复核方案
 3. IF 存在 `[P]` 并行任务，且已安装 `oh-my-claudecode`，THEN MAY 用以下方式接入外部 agent：
-   - `/oh-my-claudecode:team "implement tasks <task-id list> with clear file ownership"`
-   - `/oh-my-claudecode:omc-teams 2:codex "implement task <task-id> in <path> only"`
-   - `/oh-my-claudecode:ask gemini "review this implementation approach before coding"`
+   - `/team 3:executor "implement tasks <task-id list> with clear file ownership"`
+   - `omc team 2:codex "implement task <task-id> in <path> only"`
+   - `/ask gemini "review this implementation approach before coding"`
 4. 使用外部 agent 时，MUST 先明确每个 agent 的文件所有权、输入上下文和验收条件；MUST NOT 让多个 agent 同时改同一文件
 5. 每完成一个原子任务，MUST 立即执行 `/commit-message` 生成提交信息，等待确认后再提交；MUST NOT 直接调用 `git commit` 绕过该步骤；提交信息格式以 `/commit-message` 技能定义为准，默认使用中文，除非用户明确要求英文
 6. IF 遇到问题/踩坑，THEN MUST 将内容追加写入 `memory/issues.md`
@@ -368,9 +368,9 @@ IF 功能涉及跨组件或跨页面的共享数据，THEN MUST 在规格锁定�
 1. 执行 `/review`，审查生产级 bug（race condition、N+1、信任边界等）
 2. IF 涉及鉴权、支付、隐私、权限、密钥、数据边界等安全敏感改动，THEN 追加安全专项审查，并将结论写入同一审查文档
 3. IF 审查范围较大、风险较高、或需要多视角交叉验证，THEN SHOULD 追加外部代理编排能力做交叉复核：
-   - `/oh-my-claudecode:ccg "Review this diff: Codex 看架构/类型/测试缺口，Gemini 看可读性/UX/文档"`
-   - `/oh-my-claudecode:ask codex "review this patch for correctness, edge cases, and security assumptions"`
-   - `/oh-my-claudecode:ask gemini "review this diff for readability, UX regressions, and unclear naming"`
+   - `/ccg "Review this diff: Codex 看架构/类型/测试缺口，Gemini 看可读性/UX/文档"`
+   - `/ask codex "review this patch for correctness, edge cases, and security assumptions"`
+   - `/ask gemini "review this diff for readability, UX regressions, and unclear naming"`
 4. gitleaks pre-commit hook 在提交时自动触发 Secret 扫描
 5. 将 `/review`、安全专项审查、外部代理编排能力交叉复核中的有效发现统一汇总写入 `specs/<feature-id>/review-findings.md`，并标注来源
 6. IF 存在审查发现，THEN 修复后 MUST 重新执行本 Phase
