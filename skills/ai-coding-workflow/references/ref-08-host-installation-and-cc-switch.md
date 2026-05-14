@@ -1,12 +1,12 @@
-# §13 Claude Code / Codex / Gemini 安装与 CC Switch 切换
+# Claude Code / Codex / Gemini 安装与 CC Switch 切换
 
-> 来源：官方产品文档、官方仓库 README、`cc-switch` Releases / Repository（核对日期：2026-04-11）
+> 来源：官方产品文档、官方仓库 README、`cc-switch` Releases / Repository（核对日期：2026-05-12）
 > 适用：需要为 AI Coding Workflow 补齐宿主 CLI 安装、首次登录、以及通过 CC Switch 管理 provider / model 切换的场景
 > 关联文档：`ref-02-tool-stack.md`
 
 ---
 
-## 13.1 目标与边界
+## 目标与边界
 
 本文档只回答 4 件事：
 
@@ -24,7 +24,7 @@
 
 ---
 
-## 13.2 前置条件
+## 前置条件
 
 建议先准备以下环境：
 
@@ -47,15 +47,9 @@ Node.js / Homebrew
 
 ---
 
-## 13.3 Claude Code 安装
+## Claude Code 安装
 
 ### 推荐安装方式
-
-```bash
-npm install -g @anthropic-ai/claude-code
-```
-
-### 官方备选安装方式
 
 ```bash
 # macOS / Linux / WSL
@@ -63,6 +57,12 @@ curl -fsSL https://claude.ai/install.sh | bash
 
 # Windows PowerShell
 irm https://claude.ai/install.ps1 | iex
+```
+
+### 高级安装方式
+
+```bash
+npm install -g @anthropic-ai/claude-code
 ```
 
 ### 首次登录与验证
@@ -85,7 +85,7 @@ claude
 
 ---
 
-## 13.4 OpenAI Codex CLI 安装
+## OpenAI Codex CLI 安装
 
 ### 推荐安装方式
 
@@ -130,7 +130,7 @@ codex --login
 
 ---
 
-## 13.5 Google Gemini CLI 安装
+## Google Gemini CLI 安装
 
 ### 推荐安装方式
 
@@ -192,7 +192,7 @@ npm install -g @google/gemini-cli@nightly
 
 ---
 
-## 13.6 CC Switch 安装
+## CC Switch 安装
 
 `CC Switch` 当前用于统一管理 `Claude Code`、`Codex`、`Gemini CLI` 等多种 CLI 的 provider、model、MCP 与 skills 配置。
 
@@ -249,7 +249,7 @@ chmod +x CC-Switch-*.AppImage
 
 ---
 
-## 13.7 用 CC Switch 管理 provider / model
+## 用 CC Switch 管理 provider / model
 
 ### 推荐操作顺序
 
@@ -301,7 +301,7 @@ chmod +x CC-Switch-*.AppImage
 
 ---
 
-## 13.8 在 AI Coding Workflow 中的建议用法
+## 在 AI Coding Workflow 中的建议用法
 
 推荐职责分工如下：
 
@@ -320,7 +320,7 @@ chmod +x CC-Switch-*.AppImage
 
 ---
 
-## 13.9 常见坑
+## 常见坑
 
 ### 1. CLI 装好了，但切换后仍像没生效
 
@@ -354,10 +354,10 @@ which gemini
 
 ---
 
-## 13.10 外部参考
+## 外部参考
 
-- Claude Code Quickstart: https://docs.anthropic.com/en/docs/claude-code/quickstart
-- Claude Code Setup: https://docs.anthropic.com/en/docs/claude-code/setup
+- Claude Code Quickstart: https://code.claude.com/docs/en/quickstart
+- Claude Code Setup: https://code.claude.com/docs/en/setup
 - Codex CLI Docs: https://developers.openai.com/codex/cli
 - Codex CLI Repository: https://github.com/openai/codex
 - Codex CLI Sign in with ChatGPT: https://help.openai.com/en/articles/11381614-codex-cli-and-sign-in-with-chatgpt

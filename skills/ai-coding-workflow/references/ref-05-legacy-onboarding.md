@@ -20,7 +20,7 @@
 
 - [ ] 补写 `AGENTS.md`（MUST 包含：项目背景、技术栈、禁止事项、验证命令）
 - [ ] 建 `memory/` 目录，开始记录踩坑（`issues.md`）和决策（`decisions.md`）
-- [ ] 启用 context7 MCP；WHEN 新代码涉及外部库时，提示词 MUST 追加 `use context7`
+- [ ] 启用 Context7 MCP；WHEN 新代码涉及外部库时，优先使用 Context7 MCP 自动文档查验；无 MCP 时降级为 `use context7` / library ID / 官方文档
 - [ ] 新功能开发从 Phase 1 开始走完整流程
 
 ### 7.3 档位 B：标准接入
@@ -43,14 +43,4 @@
 
 ### 7.5 存量项目 Bug Fix 流程
 
-IF 任务为 bug fix，THEN 代理 MUST 按以下 **Phase 5B：Bug Fix 简化流** 执行，MUST NOT 误写成“从完整 Phase 5 开始”：
-
-```
-1. 先写复现测试（固化问题，防止回归）
-2. 定位并修复
-3. 已安装 gstack 时执行 /review（仅审改动范围）；未安装时改为人工审查或 CI 校验
-4. 确认测试通过
-5. 已安装 gstack 时执行 /qa（feature branch 默认 diff-aware）；未安装时改为人工或 CI 验证
-6. 已安装 gstack 时执行 /ship；未安装时走宿主常规发布流程
-7. 将踩坑内容追加写入 memory/issues.md
-```
+Bug Fix 流程统一见 `ref-03-full-workflow.md § Phase 5B`。

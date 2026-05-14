@@ -33,7 +33,7 @@ WHEN 收到新任务时，代理 MUST 先按下表确定起始 Phase，再执行
 | 需求清晰的新功能（multi-file 或新模块） | Phase 2 → Phase 9 |
 | 小变更 C1：小功能（单文件且非 bug fix，或 < 50 行净变更） | Phase 2 → Phase 9 |
 | 小变更 C2：bug fix（以修复缺陷为目的，不论单文件或多文件） | Phase 5B：Bug Fix 简化流 |
-| 使用新版本库、AI 给出错误 API | 在提示词末尾追加 `use context7` |
+| 使用新版本库、AI 给出错误 API | 优先使用 Context7 MCP 自动文档查验；无 MCP 时降级为 `use context7` / library ID / 官方文档 |
 | 多个功能并行开发 | 参见 Section 9：并行开发（ref-06） |
 
 ### 1.2 各阶段命令速查

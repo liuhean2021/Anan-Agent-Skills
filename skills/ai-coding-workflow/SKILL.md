@@ -16,7 +16,7 @@ description: 当用户需要统一的 AI 编程工作流时使用，涵盖新项
 > | `references/ref-05-legacy-onboarding.md` | §7 存量项目接入（三档策略 A/B/C + Bug Fix 简化流程） |
 > | `references/ref-06-branch-parallel.md` | §8 分支策略（主干开发、PR合并规则）+ §9 并行开发（Git Worktree + OMC 多代理选型） |
 > | `references/ref-07-advanced-practices.md` | §12 进阶实践（P1 测试分层/依赖安全/DORA/Hooks；P2 AI信任边界/环境策略/合规审查/成本管理） |
-> | `references/ref-08-host-installation-and-cc-switch.md` | §13 Claude Code / Codex / Gemini 安装 + CC Switch provider/model 切换 |
+> | `references/ref-08-host-installation-and-cc-switch.md` | Claude Code / Codex / Gemini 安装 + CC Switch provider/model 切换 |
 
 # AI Coding 工作流
 
@@ -27,7 +27,7 @@ description: 当用户需要统一的 AI 编程工作流时使用，涵盖新项
 
 **不适用**：纯闲聊、单次信息查询、纯文案改写、纯翻译、仅做简短说明而不进入研发流程的场景。
 
-本技能中的“工作流”默认指**统一的 AI Coding Workflow**。`Phase 0~10` 与 `Phase 5B` 是唯一主线阶段定义；`spec-kit`、`gstack`、外部代理编排能力、`context7`、`gitleaks`、`git worktree`、`AGENTS.md / CLAUDE.md / memory` 等都属于按阶段介入的工作流能力，MUST NOT 理解为彼此分离的并行流程。
+本技能中的“工作流”默认指**统一的 AI Coding Workflow**。`Phase 0~10` 与 `Phase 5B` 是唯一主线阶段定义；`spec-kit`、`gstack`、外部代理编排能力、Context7 MCP、`gitleaks`、`git worktree`、`AGENTS.md / CLAUDE.md / memory` 等都属于按阶段介入的工作流能力，MUST NOT 理解为彼此分离的并行流程。
 
 详细阶段、工具映射与治理规则见下方章节和 `references/`。
 
@@ -72,7 +72,7 @@ Phase 9  发布
 Phase 10 复盘
 ```
 
-每个阶段可按需接入不同能力：例如 `spec-kit` 负责规格/方案/任务/实现骨架，`gstack` 负责方向评审、架构评审、审查、QA、发布与复盘，外部代理编排能力负责并行执行或多模型复核，`context7` 负责核对上游官方文档，`gitleaks` 负责 Secret 扫描，`memory` 负责沉淀决策与踩坑记录。
+每个阶段可按需接入不同能力：例如 `spec-kit` 负责规格/方案/任务/实现骨架，`gstack` 负责方向评审、架构评审、审查、QA、发布与复盘，外部代理编排能力负责并行执行或多模型复核，Context7 MCP 负责核对上游官方文档，`gitleaks` 负责 Secret 扫描，`memory` 负责沉淀决策与踩坑记录。
 
 ---
 
@@ -156,7 +156,7 @@ Phase 9：发布（按 Phase 9 发布链路执行；未安装 gstack 时走宿�
 
 ## 场景 C：小变更
 
-> bug fix 详细流程 → `references/ref-05-legacy-onboarding.md § 7.5`
+> bug fix 详细流程 → `references/ref-03-full-workflow.md § Phase 5B`
 
 **C1 小功能**：单文件且**非 bug fix**，或 < 50 行净变更。从 Phase 2 开始，跳过 Phase 1（产品方向），走 Phase 2→9。
 
@@ -186,7 +186,7 @@ Phase 9：发布（按 Phase 9 发布链路执行；未安装 gstack 时走宿�
 | B 标准接入 | 准备规范化，有改造时间 | 1~3 天 |
 | C 全面接入 | 有专项技术改造计划 | 按模块排期 |
 
-**档位 A 最小动作**：补写 `AGENTS.md` → 建 `memory/` → 启用 context7 → 新功能走完整流程
+**档位 A 最小动作**：补写 `AGENTS.md` → 建 `memory/` → 启用 Context7 MCP（无 MCP 时降级为 `use context7` / library ID / 官方文档）→ 新功能走完整流程
 
 ---
 
@@ -200,7 +200,7 @@ Phase 9：发布（按 Phase 9 发布链路执行；未安装 gstack 时走宿�
 | specify-cli（CLI） | `uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git@vX.Y.Z` |
 | spec-kit 项目文件 | `specify init --here --force --integration <agent-key>` |
 | gitleaks | `brew upgrade gitleaks` |
-| oh-my-claudecode | `omc update` 或 `npm i -g oh-my-claude-sisyphus@latest`；刷新 config 需另跑 `omc setup`、`/setup` 或 `/omc-setup` |
+| oh-my-claudecode | `omc update` 或 `npm i -g oh-my-claude-sisyphus@latest`（npm 发布包名，项目品牌名相同）；刷新 config 需另跑 `omc setup`、`/setup` 或 `/omc-setup` |
 
 进入场景 E 或用户明确要求时，代理 SHOULD 按 `§ 10.6` 检查核心工具版本；默认不在每次会话开始时自动升级工具。
 
@@ -278,7 +278,7 @@ IF 以上任一条件不满足，THEN MUST 退回场景 B 或 C，走完整流�
 
 1. 进行开发任务时，默认使用 `~/.claude/skills/ai-coding-workflow/SKILL.md`。
 2. “工作流”指统一的 AI Coding Workflow，按 `Phase 0~10 / Phase 5B` 推进，不把 spec-kit / gstack 视为分离流程。
-3. 阶段内可按需使用 spec-kit、gstack、外部代理编排、context7、gitleaks、memory 等能力。
+3. 阶段内可按需使用 spec-kit、gstack、外部代理编排、Context7 MCP、gitleaks、memory 等能力。
 4. 意图模糊时，先判断场景：新项目 / 新功能 / 小变更 / 存量接入 / 工具升级 / 并行开发。
 ```
 
@@ -295,7 +295,7 @@ IF 以上任一条件不满足，THEN MUST 退回场景 B 或 C，走完整流�
 
 1. 进行开发任务时，默认使用 `<your-skills-path>/ai-coding-workflow/SKILL.md`。
 2. “工作流”指统一的 AI Coding Workflow，按 `Phase 0~10 / Phase 5B` 推进，不把 spec-kit / gstack 视为分离流程。
-3. 阶段内可按需使用 spec-kit、gstack、外部代理编排、context7、gitleaks、memory 等能力。
+3. 阶段内可按需使用 spec-kit、gstack、外部代理编排、Context7 MCP、gitleaks、memory 等能力。
 4. 意图模糊时，先判断场景：新项目 / 新功能 / 小变更 / 存量接入 / 工具升级 / 并行开发。
 5. Codex CLI 中 spec-kit 使用 `$speckit-*`；当前 host 未安装的能力降级为人工审查、测试命令或 CI 流程。
 ```

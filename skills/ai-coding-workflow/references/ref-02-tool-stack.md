@@ -14,7 +14,7 @@ AI Coding Workflow 以 `Phase 0~10 / 5B` 为主线推进。以下工具与角色
 |------|------|------|
 | 基础环境层 | Claude Code 原生 hooks | 自动化质量卡口、事件触发命令或 prompt/agent/http/mcp_tool handler |
 | 上下文层 | AGENTS.md + CLAUDE.md + memory/ | 项目记忆、AI 角色定义、架构决策 |
-| 文档层 | Context7 CLI + Skills / MCP | 实时注入最新库文档，防止 API 幻觉 |
+| 文档层 | Context7 MCP | 自动查验最新库文档；无 MCP 时降级为提示词、library ID 或官方文档 |
 | 需求层 | spec-kit | 规格驱动开发，需求 → 规格 → 计划 → 任务 |
 | 外部代理层 | oh-my-claudecode | 调用 Codex / Gemini / 外部 CLI worker 并行实现或复核 |
 | 验证层 | gstack + 单元测试 | UI 验证 + 业务逻辑覆盖 |
@@ -46,7 +46,7 @@ AI Coding Workflow 以 `Phase 0~10 / 5B` 为主线推进。以下工具与角色
 |------|------|
 | `spec-kit` 官方文档 / 官方仓库 | 校准 Phase 0 / 2 / 3 / 4 / 5 / 6 的规格链路顺序、核心命令与产物定义 |
 | `gstack` 官方站 / 官方仓库 | 校准 Phase 1 / 3 / 7 / 8 / 9 / 10 的评审、QA、发布、复盘类职责边界 |
-| 其他工具官方文档 / 官方仓库 | 校准外部代理编排、`context7`、`gitleaks` 等阶段辅助能力的真实用法 |
+| 其他工具官方文档 / 官方仓库 | 校准外部代理编排、Context7 MCP、`gitleaks` 等阶段辅助能力的真实用法 |
 
 **规则**：
 - 当本技能与上游工具当前行为存在冲突或歧义时，SHOULD 先复核上游官方文档，再回写本技能
@@ -150,7 +150,7 @@ git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/.co
 
 | 工具 | 用法 |
 |------|------|
-| Context7 | 优先用 `npx ctx7 setup` 安装 CLI + Skills 或 MCP；提示词末尾加 `use context7`，或指定库 ID 如 `use library /vercel/next.js` |
+| Context7 | 优先使用 Context7 MCP 自动文档查验；无 MCP 时降级为提示词末尾加 `use context7`、指定库 ID（如 `use library /vercel/next.js`）或查官方文档 |
 | Context7 MCP | 手动配置时使用 `https://mcp.context7.com/mcp`，API key 推荐通过 `CONTEXT7_API_KEY` header 提供 |
 | Claude Code hooks | 用户级 `~/.claude/settings.json`、项目级 `.claude/settings.json`、本地 `.claude/settings.local.json`；handler 可为 `command`、`prompt`、`agent`、`http`、`mcp_tool` |
 | AGENTS.md | 项目根目录，定义规范 + 禁止事项 + 验证命令 |
@@ -159,7 +159,7 @@ git clone --single-branch --depth 1 https://github.com/garrytan/gstack.git ~/.co
 
 ```bash
 # 升级
-npm i -g oh-my-claude-sisyphus@latest  # npm 安装方式；包名与项目品牌名不同
+npm i -g oh-my-claude-sisyphus@latest  # npm 发布包名；项目品牌名为 oh-my-claudecode（两者指同一项目，npm 注册名不同）
 omc update                             # 检查并安装更新
 omc update --check                     # 仅检查更新，不安装
 omc setup                              # 安装/刷新 hooks、agents、skills 等配置
