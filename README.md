@@ -20,19 +20,29 @@
 
 ## 安装说明（适用于人工与 Agent）
 
-### 一键安装（推荐）
+### 推荐方式：npx skills
 
-以下命令将仓库克隆到本地并自动软链接所有技能到 Claude Code 技能目录：
+使用 [skills CLI](https://github.com/vercel-labs/skills) 一条命令安装，支持所有 Agent：
 
 ```bash
-git clone https://github.com/liuhean2021/Anan-Agent-Skills ~/anan-agent-skills \
-  && mkdir -p ~/.claude/skills \
-  && for skill in ~/anan-agent-skills/skills/*/; do \
-       ln -sf "$skill" ~/.claude/skills/"$(basename "$skill")"; \
-     done
+# 安装全部技能到当前项目
+npx skills add liuhean2021/Anan-Agent-Skills
+
+# 全局安装（所有项目可用）
+npx skills add liuhean2021/Anan-Agent-Skills -g
+
+# 指定 Agent（如仅安装到 Claude Code）
+npx skills add liuhean2021/Anan-Agent-Skills -a claude
+
+# 安装单个技能
+npx skills add liuhean2021/Anan-Agent-Skills -s ai-coding-workflow
 ```
 
-### 分步安装
+安装完成后 Agent 自动识别技能；含依赖的技能在首次使用时由 Agent 自行安装。
+
+### 手动安装
+
+如不使用 `npx skills`，也可手动克隆并软链接：
 
 **第一步：克隆仓库**
 
@@ -65,8 +75,6 @@ for skill in ~/anan-agent-skills/skills/*/; do
   ln -sf "$skill" ~/.claude/skills/"$(basename "$skill")"
 done
 ```
-
-完成后 Agent 自动识别技能；含依赖的技能在首次使用时由 Agent 自行安装。
 
 > `ai-coding-workflow` 属于全局规则型技能。安装后，还需按其 `SKILL.md` 中的「初次配置（全局强制生效）」章节，将最小必要规则写入对应 Agent 的全局规则文件（如 `~/.claude/CLAUDE.md`、`~/.codex/AGENTS.md`）。
 >
