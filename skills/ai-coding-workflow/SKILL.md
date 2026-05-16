@@ -29,9 +29,15 @@ description: 当用户需要统一的 AI 编程工作流时使用，涵盖新项
 
 本技能中的“工作流”默认指**统一的 AI Coding Workflow**。`Phase 0~10` 与 `Phase 5B` 是唯一主线阶段定义；`spec-kit`、`gstack`、外部代理编排能力、Context7 MCP、`gitleaks`、`git worktree`、`AGENTS.md / CLAUDE.md / memory` 等都属于按阶段介入的工作流能力，MUST NOT 理解为彼此分离的并行流程。
 
+本技能是独立技能，不依赖其他技能。涉及前端实施或视觉验证时，本技能只定义通用产物与阶段 gate；具体执行可由宿主 Agent、人工流程或其他前端工具完成，不要求安装任何特定前端技能。
+
 详细阶段、工具映射与治理规则见下方章节和 `references/`。
 
-涉及前端交互需求时，本工作流只在**需求阶段**锁定交互设计与可视化基线；页面实现、组件开发、视觉还原属于后续实施阶段。
+涉及前端交互需求时，所有前端设计文档（`docs/design-system/DESIGN.md`、`specs/<feature-id>/interaction-design.md`、`specs/<feature-id>/design-system-context.md`、设计引用与可视化基线）都必须在 **Phase 2 / spec 阶段**完成并锁定。Phase 3 之后只负责引用、拆解、实施、验证这些已锁定设计输入；页面实现、组件开发、视觉还原属于后续实施阶段，MUST NOT 在实施阶段临场补写或新建设计文档。
+
+## 工具不可用时的统一降级策略
+
+当 host 未安装 gstack 时，所有引用 /review、/qa、/ship 的步骤统一降级为：人工审查、测试命令或 CI 流程。后续各 Phase 不再重复声明此降级规则。
 
 ## 命令映射
 
@@ -107,25 +113,28 @@ Phase 10 复盘
 
 **A2 需求规格**
 执行 spec-kit 规格链路：specify → clarify → checklist。先生成初稿 → **重复澄清** 直到规格无歧义 → 推荐在 `plan` 前执行 checklist 并闭环问题；高风险或高歧义需求 MUST 执行 → 锁定 `spec.md`。
-若需求涉及页面、组件、弹窗、表单、导航、状态切换或操作反馈，则视为涉及前端交互需求，本阶段必须产出 `interaction-design.md`。若存在可视化设计稿，按以下标准操作流处理：
+IF 任何 UI 可见变更（非纯逻辑/API 变更），THEN 视为涉及前端交互需求。
+IF 项目级 `DESIGN.md` 不存在，THEN 生成最小版 `docs/design-system/DESIGN.md`；IF 存在，THEN 直接引用。为当前 feature 生成 `specs/<feature-id>/design-system-context.md`，明确本功能适用的 `DESIGN.md` 规则。
+涉及前端交互需求时，本阶段必须产出 `interaction-design.md`，且包含「UI 设计图」与「UX 交互文档」两章；缺任一项时 `spec.md` 不得锁定。若存在可视化设计稿，按以下标准操作流处理：
 1. **获取**：IF 设计稿托管于在线平台（Figma / 蓝湖 / 其他），获取长久分享链接；IF 仅有离线文件（PDF / 截图 / 原型包），记录文件名与存放路径
 2. **记录**：将在线链接（或离线文件路径）写入 `interaction-design.md` 的「设计引用」章节（MUST，唯一主入口）
 3. **拉取（可选）**：如需本地查看，临时拉取到 `design-assets/`，该目录须加入 `.gitignore`，不提交 Git
 
-仅有文字需求而无可视化设计交付物时，不得直接进入后续实现阶段。
+仅有文字需求而无可视化设计交付物时，不得锁定 `spec.md`，也不得进入后续阶段。
 注意：clarify 追加写入，可多次执行；specify 会覆盖整个 `spec.md`，仅在推倒重来时使用。
 
 **A3 技术方案**
-执行 spec-kit plan → `/plan-eng-review`，生成 `plan.md`、`research.md`、`data-model.md`、`contracts/`、`arch-review.md`。若已产出前端交互设计，则 `plan.md` MUST 引用 `interaction-design.md`，说明后续前端实现如何消费设计产物。
+执行 spec-kit plan → `/plan-eng-review`，生成 `plan.md`、`research.md`、`data-model.md`、`contracts/`、`arch-review.md`。若已产出前端交互设计，则 `plan.md` MUST 同时引用 `interaction-design.md` 和 `design-system-context.md`，说明后续前端实现如何消费设计产物与设计系统规则。
+若进入本阶段后发现任一前端设计文档或设计基线缺失，MUST 返回 Phase 2 补齐并重新锁定规格，MUST NOT 在 Phase 3+ 直接补写设计文档。
 
 **A4 任务拆解**
-执行 spec-kit tasks，生成 `tasks.md`。若已产出前端交互设计，则前端任务 MUST 基于 `interaction-design.md` 拆解，而不是只依据文字规格。
+执行 spec-kit tasks，生成 `tasks.md`。若已产出前端交互设计，则前端任务 MUST 基于 `interaction-design.md` 拆解，而不是只依据文字规格。前端任务 MUST 包含设计还原验证任务，明确截图/人工验收/视觉对比证据。
 
 **A5 TDD + 实施**（详见 `§ Phase 5-6`）
 执行一致性分析 → 先写失败测试 → 执行实现（必要时用外部代理编排能力并行）→ 绿灯。具体页面实现与组件开发在 Phase 6 执行，不在需求阶段提前落代码。
 
 **A6 审查 + QA + 发布**（详见 `§ Phase 7-9`）
-执行审查 → QA → 按 Phase 9 发布链路进入 CI / Review / 合并 / staging quick QA / production。若涉及前端交互，QA MUST 将 `interaction-design.md` 及「设计引用」章节中的设计基线（在线链接或离线文件路径）作为对照输入之一。若当前 host 未安装 gstack，则用人工审查、测试命令或 CI 流程替代对应命令。
+执行审查 → QA → 按 Phase 9 发布链路进入 CI / Review / 合并 / staging quick QA / production。若涉及前端交互，QA MUST 将 `interaction-design.md`、`design-system-context.md` 及「设计引用」章节中的设计基线（在线链接或离线文件路径）作为对照输入之一。若 QA 发现设计效果与目标基线不一致，MUST 返回 Phase 6 修复；若基线缺失或错误，返回 Phase 2。
 
 **A7 复盘**  
 `/retro` → 有价值经验写入 `memory/patterns.md`。
@@ -137,14 +146,14 @@ Phase 10 复盘
 > 详细流程 → `references/ref-03-full-workflow.md § Phase 2-9`
 
 ```
-Phase 2：需求规格（执行 spec-kit 规格链路：specify → clarify → checklist。生成初稿 → 重复澄清至无歧义 → 推荐在 plan 前执行 checklist，高风险或高歧义需求强制执行 → 锁定 spec.md；若涉及前端交互，MUST 产出 `interaction-design.md`，并将设计基线记录到「设计引用」章节）
-Phase 3：技术方案（spec-kit plan → /plan-eng-review → arch-review.md；若涉及前端交互，`plan.md` MUST 引用 `interaction-design.md` 作为实现输入）
-Phase 4：任务拆解（spec-kit tasks → tasks.md；若涉及前端交互，前端任务 MUST 基于设计产物拆解）
-Phase 5：一致性分析 + TDD（spec-kit analyze → 对 `spec.md` / `interaction-design.md` / `plan.md` / `tasks.md` 做一致性分析 → 先写失败测试 → 提交测试基线）
+Phase 2：需求规格（执行 spec-kit 规格链路：specify → clarify → checklist。生成初稿 → 重复澄清至无歧义 → 推荐在 plan 前执行 checklist，高风险或高歧义需求强制执行 → 锁定 spec.md；IF 任何 UI 可见变更（非纯逻辑/API 变更），THEN 视为涉及前端交互需求，MUST 产出 `interaction-design.md` 和 `design-system-context.md`，并将设计基线记录到「设计引用」章节，且包含「UI 设计图」与「UX 交互文档」两章；缺任一项时 `spec.md` 不得锁定）
+Phase 3：技术方案（spec-kit plan → /plan-eng-review → arch-review.md；若涉及前端交互，`plan.md` MUST 同时引用 `interaction-design.md` 和 `design-system-context.md` 作为实现输入）
+Phase 4：任务拆解（spec-kit tasks → tasks.md；若涉及前端交互，前端任务 MUST 基于设计产物拆解；前端任务 MUST 包含设计还原验证任务）
+Phase 5：一致性分析 + TDD（spec-kit analyze → 对 `spec.md` / `interaction-design.md` / `design-system-context.md` / `plan.md` / `tasks.md` 做一致性分析 → 先写失败测试 → 提交测试基线）
 Phase 6：实施（spec-kit implement；必要时配合外部代理编排能力 → 绿灯 → 原子提交）
-Phase 7：审查（执行 review；安全敏感改动追加安全专项审查；未安装 gstack 时改为人工审查或 CI 替代）
-Phase 8：QA（执行 qa → qa-reports/；feature branch 默认 diff-aware；若涉及前端交互，MUST 对照 `interaction-design.md` 及「设计引用」章节中的设计基线验证；未安装 gstack 时改为人工或 CI 验证）
-Phase 9：发布（按 Phase 9 发布链路执行；未安装 gstack 时走宿主常规发布流程）
+Phase 7：审查（执行 review；安全敏感改动追加安全专项审查）
+Phase 8：QA（执行 qa → qa-reports/；feature branch 默认 diff-aware；若涉及前端交互，MUST 对照 `interaction-design.md`、`design-system-context.md` 及「设计引用」章节中的设计基线验证；若设计效果不一致 MUST 返回 Phase 6 修复，基线缺失返回 Phase 2）
+Phase 9：发布（按 Phase 9 发布链路执行）
 ```
 
 **关键约束**：
@@ -158,7 +167,7 @@ Phase 9：发布（按 Phase 9 发布链路执行；未安装 gstack 时走宿�
 
 > bug fix 详细流程 → `references/ref-03-full-workflow.md § Phase 5B`
 
-**C1 小功能**：单文件且**非 bug fix**，或 < 50 行净变更。从 Phase 2 开始，跳过 Phase 1（产品方向），走 Phase 2→9。
+**C1 小功能**：单文件且**非 bug fix**，或 < 50 行净变更。从 Phase 2 开始，跳过 Phase 1（产品方向），走 Phase 2→9。若涉及 UI/UX，仍继承 Phase 2 的设计基线硬 gate。
 
 **C2 Bug Fix**：以修复缺陷为目的时，走 **Phase 5B 简化流**，而不是复用完整 Phase 5 定义。适用于单文件或多文件修复，但不适用于新增需求或扩 scope。
 

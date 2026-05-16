@@ -45,14 +45,14 @@ WHEN 收到新任务时，代理 MUST 先按下表确定起始 Phase，再执行
 | 需求规格 | `/speckit.specify` | spec-kit | `specs/<feature-id>/spec.md` |
 | 澄清需求 | `/speckit.clarify` | spec-kit | `specs/<feature-id>/spec.md`（追加） |
 | 规格质量清单 | `/speckit.checklist` | spec-kit | `specs/<feature-id>/checklists/` |
-| 前端交互设计归档（如适用） | 与规格链路同步完成 | 手动 / 设计工具 / gstack | `specs/<feature-id>/interaction-design.md`（设计基线——在线链接或离线文件路径——记录于「设计引用」章节）；如需本地查看，临时拉取到 `design-assets/`（不提交 Git） |
+| 前端交互设计归档（如适用） | 与规格链路同步完成 | 手动 / 设计工具 / gstack | `specs/<feature-id>/interaction-design.md`（必须包含「UI 设计图」与「UX 交互文档」双章节；设计基线——在线链接或离线文件路径——记录于「设计引用」章节）；如需本地查看，临时拉取到 `design-assets/`（不提交 Git） |
 | 技术方案 | `/speckit.plan` | spec-kit | `specs/<feature-id>/plan.md` `specs/<feature-id>/research.md` `specs/<feature-id>/contracts/` |
 | 架构评审 | `/plan-eng-review` | gstack | `specs/<feature-id>/arch-review.md` |
 | 任务拆解 | `/speckit.tasks` | spec-kit | `specs/<feature-id>/tasks.md` |
 | 一致性检查 | `/speckit.analyze`（在 tasks 之后） | spec-kit | — |
 | 代码实现 | Claude 用 `/speckit.implement`；Codex 用 `$speckit-implement`；外部代理编排能力按需 | spec-kit + 外部代理编排能力 | 原子提交 |
 | 代码+安全审查 | 已安装 gstack 时执行 `/review`；安全敏感改动追加安全专项审查；按需使用外部代理编排能力并行复核 + gitleaks；否则人工审查 / CI 替代 | gstack + 外部代理编排能力 | `specs/<feature-id>/review-findings.md` |
-| QA 验证 | 已安装 gstack 时执行 `/qa`（feature branch 默认 diff-aware）；否则人工或 CI 验证 | gstack | `.gstack/qa-reports/` |
+| QA 验证 | 已安装 gstack 时执行 `/qa`（feature branch 默认 diff-aware）；否则人工或 CI 验证；UI/UX 不一致时 Phase 8 失败并返回 Phase 6，基线缺失返回 Phase 2 | gstack | `.gstack/qa-reports/` |
 | 发布 | 已安装 gstack 时执行 `/ship`；否则宿主常规发布流程 | gstack | PR + CHANGELOG |
 | 周复盘 | `/retro` | gstack | `.context/retros/` |
 
@@ -64,7 +64,7 @@ WHEN 收到新任务时，代理 MUST 先按下表确定起始 Phase，再执行
 |---------|--------|
 | 方向判断 / MVP 收敛 | `/office-hours`（需求仍模糊时）→ `/plan-ceo-review` |
 | 需求落规格 | Claude 用 `/speckit.specify` → `/speckit.clarify` → `/speckit.checklist`；Codex 用 `$speckit-specify` → `$speckit-clarify` → `$speckit-checklist` |
-| 前端交互需求落规格 | spec-kit 规格链路 + 补齐 `interaction-design.md`（设计基线记录于「设计引用」章节）；复杂交互建议追加 `/plan-design-review` |
+| 前端交互需求落规格 | spec-kit 规格链路 + 补齐 `interaction-design.md`（含「UI 设计图」与「UX 交互文档」双章节，设计基线记录于「设计引用」章节；缺任一项时 `spec.md` 不得锁定）+ `design-system-context.md`；复杂交互建议追加 `/plan-design-review` |
 | 新项目或新功能：方向未定时先做方向判断，再落规格 | `/office-hours` → `/plan-ceo-review` → spec-kit 规格链路 |
 | 新项目或新功能：方向已定时快速落规格 | `/plan-ceo-review`（简版，可选）→ spec-kit 规格链路 |
 | 生成技术方案 | Claude 用 `/speckit.plan`；Codex 用 `$speckit-plan` → `/plan-eng-review` |
@@ -75,7 +75,7 @@ WHEN 收到新任务时，代理 MUST 先按下表确定起始 Phase，再执行
 | 代码实现（需并行外部 agent） | 使用外部代理编排能力（例如 `/team`、`omc team N:codex "..."`、`/omc-teams` 兼容入口或宿主等价能力） |
 | 代码实现（需专业判断） | 在 `plan.md` / `arch-review.md` 中先明确判断结论；必要时使用外部代理编排能力复核 |
 | 代码审查 | 已安装 gstack 时执行 `/review`；安全敏感改动追加安全专项审查；按需使用外部代理编排能力交叉复核；否则人工审查 / CI 替代 |
-| 功能测试 | 已安装 gstack 时执行 `/qa`（feature branch 默认 diff-aware）；否则人工或 CI 验证 |
+| 功能测试 | 已安装 gstack 时执行 `/qa`（feature branch 默认 diff-aware）；否则人工或 CI 验证；UI/UX 不一致时返回 Phase 6 修复，基线缺失返回 Phase 2 |
 | 发布上线 | 按 `ref-03-full-workflow.md` 的 Phase 9 发布链路执行 |
 | 问题回滚 | `git revert HEAD` + `/ship` |
 | 记录架构决策 | 写入 `memory/decisions.md` |
@@ -108,6 +108,8 @@ WHEN 收到新任务时，代理 MUST 先按下表确定起始 Phase，再执行
 | 产品方向结论 | `specs/<feature-id>/ceo-review.md` | 代理写入 | Phase 1 |
 | 需求规格 | `specs/<feature-id>/spec.md` | `/speckit.specify` | Phase 2 |
 | 验收 checklist | `specs/<feature-id>/checklists/` | `/speckit.checklist` | Phase 2 |
+| 项目级设计系统规范 | `docs/design-system/DESIGN.md` | 代理写入 / 首次自动生成 | Phase 2 |
+| 功能级设计系统上下文 | `specs/<feature-id>/design-system-context.md` | 代理写入 | Phase 2 |
 | 前端交互设计说明 | `specs/<feature-id>/interaction-design.md` | 代理写入 | Phase 2 |
 | 前端设计资料目录（本地临时缓存，不提交 Git） | `specs/<feature-id>/design-assets/` | 需求阶段临时拉取 | Phase 2 |
 | 前端设计来源索引（可选，次选） | `specs/<feature-id>/design-assets/source-links.md`（随 `design-assets/` 不提交 Git） | 设计基线 MUST 写入 `interaction-design.md`「设计引用」章节（唯一主入口）；`source-links.md` 仅为多链接索引的 MAY 级备份 | Phase 2 |
@@ -124,5 +126,7 @@ WHEN 收到新任务时，代理 MUST 先按下表确定起始 Phase，再执行
 | QA 报告 + 截图 | `.gstack/qa-reports/` | `/qa` 自动生成 | Phase 8 |
 | 发布日志 | `CHANGELOG.md` | `/ship` 自动生成 | Phase 9 |
 | 周复盘快照 | `.context/retros/` | `/retro` 自动生成 | Phase 10 |
+
+> 所有前端设计文档和设计基线只允许在 Phase 2/spec 阶段创建、补齐和锁定。Phase 3 之后只消费这些文档；若发现缺失、失效或错误，MUST 返回 Phase 2 修正，MUST NOT 在技术方案、任务拆解、实施、审查或 QA 阶段临场补写设计文档。
 
 > `<feature-id>` 格式为 `NNN-feature-name`，例如 `001-user-auth`。spec-kit 根据当前 Git 分支名自动检测 feature-id；非 Git 环境可设置环境变量 `SPECIFY_FEATURE=001-feature-name` 手动指定。

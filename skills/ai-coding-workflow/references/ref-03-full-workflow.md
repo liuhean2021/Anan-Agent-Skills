@@ -29,15 +29,17 @@
 
 ### 前端交互需求附加规则
 
-IF 需求涉及页面、组件、弹窗、表单、导航、状态切换或操作反馈，THEN 视为前端交互需求，并统一遵守：
-- Phase 2 MUST 产出 `interaction-design.md`，并将设计基线记录到「设计引用」章节。
+IF 任何 UI 可见变更（非纯逻辑/API 变更），THEN 视为前端交互需求，并统一遵守：
+- Phase 2 MUST 检查项目级 `docs/design-system/DESIGN.md` 是否存在；IF 不存在，THEN 生成最小版（品牌气质/颜色语义/字体层级/间距布局/组件使用原则/禁止事项）；IF 存在，THEN 直接引用。为当前 feature 生成 `specs/<feature-id>/design-system-context.md`。
+- Phase 2 MUST 产出 `interaction-design.md`，且包含「UI 设计图」与「UX 交互文档」两章；缺任一项时 `spec.md` 不得锁定。设计基线记录到「设计引用」章节。
+- 所有前端设计文档与设计基线 MUST 在 Phase 2/spec 阶段完成并锁定；Phase 3+ 只允许引用、拆解、实施、验证，MUST NOT 新建或补写 `DESIGN.md`、`interaction-design.md`、`design-system-context.md` 或设计引用。
 - 在线设计稿记录长久分享链接；离线文件记录文件名与路径；临时 `design-assets/` MUST 加入 `.gitignore`。
 - IF 没有在线设计稿、离线设计文件、截图、原型说明或明确线框图，THEN MUST 先补齐可视化设计基线，MUST NOT 进入 Phase 3 / Phase 4 / Phase 6。
-- Phase 3 的 `plan.md` MUST 引用 `interaction-design.md`，说明页面模块、交互状态、接口依赖与组件复用边界。
+- Phase 3 的 `plan.md` MUST 引用 `interaction-design.md` 和 `design-system-context.md`，说明页面模块、交互状态、接口依赖、组件复用边界与设计系统规则适用范围。
 - IF 设计复杂度较高、评审风险较高、交互边界不清、涉及多页面关键路径或核心转化路径，THEN SHOULD 执行 `/plan-design-review`。
-- Phase 4 的前端任务 MUST 基于 `interaction-design.md` 拆解，并完成组件库扫描标注。
-- Phase 5 分析 MUST 纳入 `interaction-design.md`；Phase 6 实施 MUST 同时以 `spec.md`、`interaction-design.md`、`plan.md`、`tasks.md` 为输入；Phase 8 QA MUST 对照 `interaction-design.md` 与设计基线。
-- Phase 8 QA 报告 MUST 标注对照的设计引用、关键页面截图、差异结论；若存在偏差，MUST 标注是否阻断发布。
+- Phase 4 的前端任务 MUST 基于 `interaction-design.md` 拆解，并完成组件库扫描标注。前端任务 MUST 包含设计还原验证任务，明确截图/人工验收/视觉对比证据。
+- Phase 5 分析 MUST 纳入 `interaction-design.md` 和 `design-system-context.md`；Phase 6 实施 MUST 同时以 `spec.md`、`interaction-design.md`、`design-system-context.md`、`plan.md`、`tasks.md` 为输入；Phase 8 QA MUST 对照 `interaction-design.md`、`design-system-context.md` 与设计基线。
+- Phase 8 QA 报告 MUST 标注对照的设计引用、关键页面截图、差异结论；若存在偏差，MUST 标注是否阻断发布。若设计效果与目标基线不一致，MUST 返回 Phase 6 修复；若基线缺失或错误，返回 Phase 2。
 - 页面实现、组件开发、视觉还原只在 Phase 6 执行，MUST NOT 在需求阶段提前落代码。
 
 ### 5.2 全流程（Phase 0 ~ Phase 10）
@@ -151,12 +153,13 @@ IF 方向尚未确认、MVP 边界仍在摇摆、存在"先做哪个版本"争�
 5. IF 已执行 checklist 且仍暴露缺口，THEN MUST 回到 `spec.md` 补齐后再次执行 `/speckit.checklist`，直到问题闭环
 6. MUST NOT 通过重复执行 `/speckit.specify` 来补充规格——该命令会**覆盖**整个 `spec.md`，仅在初稿方向完全跑偏需要推倒重来时才使用
 7. 将用户故事、功能边界、验收标准、约束条件写全
-8. IF 涉及前端交互需求，THEN 按「前端交互需求附加规则」补齐设计基线
+7a. IF 涉及前端交互需求，THEN MUST 检查项目级 `docs/design-system/DESIGN.md` 是否存在；IF 不存在，THEN 生成最小版（品牌气质/颜色语义/字体层级/间距布局/组件使用原则/禁止事项）；IF 存在，THEN 直接引用。为当前 feature 生成 `specs/<feature-id>/design-system-context.md`。
+8. IF 涉及前端交互需求，THEN 按「前端交互需求附加规则」补齐设计基线。MUST 产出 `interaction-design.md`，且包含「UI 设计图」与「UX 交互文档」两章；缺任一项时 `spec.md` 不得锁定
 9. 规格确认后锁定
 
-**产出物**：`specs/<feature-id>/spec.md`、`specs/<feature-id>/checklists/`、`specs/<feature-id>/interaction-design.md`（如适用）
+**产出物**：`specs/<feature-id>/spec.md`、`specs/<feature-id>/checklists/`、`specs/<feature-id>/interaction-design.md`（如适用）、`specs/<feature-id>/design-system-context.md`（如适用）
 
-**退出条件**：规格无歧义，checklist 已生成并闭环，规格已锁定；若涉及前端交互需求，则 Phase 2 对应的 `interaction-design.md` 与设计基线已就位。
+**退出条件**：规格无歧义，checklist 已生成并闭环，规格已锁定；若涉及前端交互需求，则 Phase 2 对应的 `interaction-design.md`（含「UI 设计图」与「UX 交互文档」两章）、`design-system-context.md` 与设计基线已就位。
 
 > IF 后续阶段发现规格有误，THEN 代理 MUST 返回本 Phase 正式修改，MUST NOT 在实施阶段绕过规格直接改代码。
 >
@@ -272,7 +275,7 @@ IF 功能涉及跨组件或跨页面的共享数据，THEN MUST 在规格锁定�
 **必做动作**：
 1. IF 涉及陌生库、新版本 SDK、或近期变化的 API，THEN 优先使用 Context7 MCP 自动文档查验；无 MCP 时降级为 `use context7` / library ID / 官方文档，防 API 幻觉，再确定方案
 2. 执行 `/speckit.plan "<技术栈>"`，生成 `plan.md`、`research.md`、`data-model.md`、`contracts/`
-3. IF 涉及前端交互需求，THEN 按「前端交互需求附加规则」补齐 `plan.md` 引用，并按触发条件决定是否执行 `/plan-design-review`
+3. IF 涉及前端交互需求，THEN `plan.md` MUST 引用 Phase 2 已锁定的 `interaction-design.md` 和 `design-system-context.md` 作为前端实现输入，并按触发条件决定是否执行 `/plan-design-review`；若任一设计文档或设计基线缺失，MUST 返回 Phase 2，MUST NOT 在本阶段补写
 4. 执行 `/plan-eng-review`，深度审查图表、边界条件、失败模式
 5. 将架构评审结论写入 `specs/<feature-id>/arch-review.md`
 6. 将架构决策追加写入 `memory/decisions.md`
@@ -285,7 +288,7 @@ IF 功能涉及跨组件或跨页面的共享数据，THEN MUST 在规格锁定�
 
 **产出物**：`specs/<feature-id>/plan.md`、`specs/<feature-id>/research.md`、`specs/<feature-id>/data-model.md`、`specs/<feature-id>/contracts/`、`specs/<feature-id>/arch-review.md`、`memory/decisions.md`（追加）
 
-**退出条件**：技术方案已通过架构评审，产出物已写入；若涉及前端交互需求，则 `plan.md` 已引用 `interaction-design.md` 并说明页面模块、交互状态、接口依赖与组件复用边界；若涉及 DB 迁移则迁移方案已包含在 `plan.md`；若涉及 API 变更则 `contracts/` 已先于实现更新。
+**退出条件**：技术方案已通过架构评审，产出物已写入；若涉及前端交互需求，则 `plan.md` 已引用 `interaction-design.md` 和 `design-system-context.md` 并说明页面模块、交互状态、接口依赖、组件复用边界与设计系统规则适用范围；若涉及 DB 迁移则迁移方案已包含在 `plan.md`；若涉及 API 变更则 `contracts/` 已先于实现更新。
 
 ---
 
@@ -295,7 +298,7 @@ IF 功能涉及跨组件或跨页面的共享数据，THEN MUST 在规格锁定�
 
 **必做动作**：
 1. 执行 `/speckit.tasks`，生成 `tasks.md`，含 `[P]` 并行标记与 TDD 标记
-2. IF 涉及前端交互需求，THEN 按「前端交互需求附加规则」拆解前端任务；若设计基线缺失，MUST 返回 Phase 2 补齐
+2. IF 涉及前端交互需求，THEN 按「前端交互需求附加规则」拆解前端任务；若设计文档或设计基线缺失，MUST 返回 Phase 2 补齐，MUST NOT 在本阶段补写
 3. **[P0-1 组件库感知]** IF 任务涉及前端 UI 实现，THEN 在生成 `tasks.md` 前 MUST 扫描项目现有组件目录（如 `src/components/`、`src/ui/`、设计系统包），在每条前端任务中标注：
    - `[复用]` — 使用现有组件，注明组件路径
    - `[扩展]` — 基于现有组件扩展，注明基础组件
@@ -304,7 +307,7 @@ IF 功能涉及跨组件或跨页面的共享数据，THEN MUST 在规格锁定�
 
 **产出物**：`specs/<feature-id>/tasks.md`
 
-**退出条件**：原子任务列表已生成，并行任务已标记；若涉及前端交互需求，则前端任务已基于 `interaction-design.md` 拆解，并完成组件库扫描标注。
+**退出条件**：原子任务列表已生成，并行任务已标记；若涉及前端交互需求，则前端任务已基于 `interaction-design.md` 拆解，并完成组件库扫描标注，且包含设计还原验证任务。
 
 ---
 
@@ -313,7 +316,7 @@ IF 功能涉及跨组件或跨页面的共享数据，THEN MUST 在规格锁定�
 **进入条件**：WHEN Phase 4 已完成，且小功能/新功能类改动开始实施前。bug fix 默认走 Phase 5B 简化流。
 
 **必做动作**：
-1. Claude 执行 `/speckit.analyze`，Codex 执行 `$speckit-analyze`，对 `spec.md`、`plan.md`、`tasks.md` 做只读一致性分析；涉及前端交互需求时按附加规则纳入 `interaction-design.md`
+1. Claude 执行 `/speckit.analyze`，Codex 执行 `$speckit-analyze`，对 `spec.md`、`plan.md`、`tasks.md` 做只读一致性分析；涉及前端交互需求时按附加规则纳入 `interaction-design.md` 和 `design-system-context.md`
 2. 按验收标准先写失败测试
 3. IF 后续实现预计会调用外部 agent，THEN 先在 `tasks.md` 标注可并行项与上下文边界，避免多个 agent 重复改同一文件
 4. 执行 `/commit-message` 生成提交信息，等待确认后再执行提交；提交格式以该技能定义为准，如需标识 `<feature-id>`，可写入摘要或说明列表
@@ -361,7 +364,7 @@ IF 功能涉及跨组件或跨页面的共享数据，THEN MUST 在规格锁定�
 5. 每完成一个原子任务，MUST 立即执行 `/commit-message` 生成提交信息，等待确认后再提交；MUST NOT 直接调用 `git commit` 绕过该步骤；提交信息格式以 `/commit-message` 技能定义为准，默认使用中文，除非用户明确要求英文
 6. IF 遇到问题/踩坑，THEN MUST 将内容追加写入 `memory/issues.md`
 7. IF 发现规格有误，THEN MUST 返回 Phase 2 正式修改，重走 Phase 3，MUST NOT 绕过
-8. IF 涉及前端交互需求，THEN 页面实现、组件开发与视觉还原 MUST 同时以 `spec.md`、`interaction-design.md`、`plan.md`、`tasks.md` 为输入，按「前端交互需求附加规则」执行，MUST NOT 临场发挥或绕过设计基线
+8. IF 涉及前端交互需求，THEN 页面实现、组件开发与视觉还原 MUST 同时以 `spec.md`、`interaction-design.md`、`design-system-context.md`、`plan.md`、`tasks.md` 为输入，按「前端交互需求附加规则」执行，MUST NOT 临场发挥、绕过设计基线，或在 Phase 6 新建/补写前端设计文档
 
 **产出物**：原子提交，`memory/issues.md`（如有追加）
 
@@ -397,11 +400,11 @@ IF 功能涉及跨组件或跨页面的共享数据，THEN MUST 在规格锁定�
 **必做动作**：
 1. 执行 `/qa`，生成 `qa-reports/`（feature branch 默认 diff-aware，含截图）
 2. 对照 checklist 逐条确认验收标准
-3. IF 涉及前端交互需求，THEN 按「前端交互需求附加规则」对照设计基线验证关键页面结构、交互流转、状态矩阵与响应式规则，并在 QA 报告中标注设计引用、关键页面截图、差异结论；差异需标注 `blocking` / `non-blocking` / `accepted`
+3. IF 涉及前端交互需求，THEN 按「前端交互需求附加规则」对照 `interaction-design.md`、`design-system-context.md` 与设计基线验证关键页面结构、交互流转、状态矩阵与响应式规则，并在 QA 报告中标注设计引用、关键页面截图、差异结论；差异需标注 `blocking` / `non-blocking` / `accepted`
 
 **产出物**：`.gstack/qa-reports/`（含截图）
 
-**退出条件**：所有验收条目通过，截图已存档；若涉及前端交互需求，则设计对照验证已通过，QA 报告已记录设计引用、关键页面截图、差异结论与差异分级。
+**退出条件**：所有验收条目通过，截图已存档；若涉及前端交互需求，则设计对照验证已通过，QA 报告已记录设计引用、关键页面截图、差异结论与差异分级。若设计效果与目标基线不一致，MUST 返回 Phase 6 修复；若基线缺失或错误，返回 Phase 2。
 
 ---
 
