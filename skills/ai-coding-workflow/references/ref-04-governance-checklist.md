@@ -43,49 +43,52 @@
 
 - [ ] `specify init . --integration <agent-key>` 初始化 spec-kit（Codex CLI 常用 `--integration codex --integration-options="--skills"`）
 - [ ] `/speckit.constitution` 建立项目原则
-- [ ] 补充 `AGENTS.md` / `CLAUDE.md`
-- [ ] 确认 Context7 MCP 已启用；无 MCP 时明确降级路径为 `use context7` / library ID / 官方文档
+- [ ] 补充 `AGENTS.md`/`CLAUDE.md`
+- [ ] 确认 Context7 MCP 已启用；无 MCP 时明确降级路径为 `use context7`/library ID/官方文档
 
 ### 6.2 每个功能开始前
 
 - [ ] 按 Section 1.1 判断任务规模，确定起始 Phase
 - [ ] IF 方向未定、MVP 边界未定、或影响重大：先执行 `/office-hours`，再执行 `/plan-ceo-review`，将结论写入 `specs/<feature-id>/ceo-review.md`
-- [ ] IF 涉及陌生库、新版本 SDK、或近期变化的工具行为：优先使用 Context7 MCP 自动文档查验；无 MCP 时降级为 `use context7` / library ID / 官方文档，再进入规格 / 方案动作
+- [ ] IF 涉及陌生库、新版本 SDK、或近期变化的工具行为：优先使用 Context7 MCP 自动文档查验；无 MCP 时降级为 `use context7`/library ID/官方文档，再进入规格/方案动作
 - [ ] IF 方向已定且需求明确：执行 `/speckit.specify` + `/speckit.clarify`，锁定规格（变更须回 Phase 2 正式修改）
 - [ ] 推荐在 `/speckit.plan` 前执行 `/speckit.checklist`；复杂需求、高风险或高歧义需求 MUST 执行，并补齐需求完整性/清晰度/一致性问题
 - [ ] IF 涉及前端交互需求：在锁定规格前补齐 `specs/<feature-id>/interaction-design.md`
-- [ ] IF 涉及前端 UI/UX，THEN 规格锁定前 MUST 确认 `interaction-design.md` 包含 UI 设计图与 UX 交互文档双章节
-- [ ] IF 已有设计文件、原型、分享链接或截图：MUST 将设计基线记录到 `interaction-design.md` 的「设计引用」章节（主入口）——在线平台提供链接则记链接，仅有离线文件（PDF / 截图）则记文件路径；仅维护多索引时可同步备份至 `source-links.md`；如需本地查看，可临时拉取到 `specs/<feature-id>/design-assets/`（须加入 `.gitignore`）
+- [ ] IF 涉及前端 UI/UX，THEN 规格锁定前 MUST 判定 design-level（L1/L2/L3），确认 `interaction-design.md` 已按对应级别填写模板章节（L1 完整填写：页面结构 + 交互流转 + 状态矩阵 + 响应式适配 + 可访问性；L2 填写页面结构、交互流转与状态矩阵；L3 填写页面结构与状态矩阵）
+- [ ] IF 已有设计文件、原型、分享链接或截图：MUST 将设计基线记录到 `interaction-design.md` 的「设计引用」章节（主入口）——在线平台提供链接则记链接，仅有离线文件（PDF/截图）则记文件路径；仅维护多索引时可同步备份至 `specs/<feature-id>/source-links.md`；如需本地查看，可临时拉取到 `specs/<feature-id>/design-assets/`（须加入 `.gitignore`）
 - [ ] IF 涉及前端 UI/UX，THEN 所有前端设计文档与设计基线已在 Phase 2/spec 阶段完成并锁定；后续 Phase 只允许引用、拆解、实施和验证
-- [ ] IF 涉及前端交互需求且没有在线设计稿、离线设计文件、截图、原型说明或明确线框图：MUST 先补齐可视化设计基线，MUST NOT 进入 Phase 3 / Phase 4 / Phase 6
+- [ ] IF 涉及前端 UI/UX 且项目级 `DESIGN.md` 不存在，THEN 生成 `DESIGN.md`，遵循 Google Stitch DESIGN.md 基础格式；本工作流追加以下章节要求：`Responsive Behavior`/`Iteration Guide`
+- [ ] IF 生成或修改 `DESIGN.md`，THEN SHOULD 运行 `npx @google/design.md lint DESIGN.md` 验证格式
+- [ ] IF 涉及前端 UI/UX，THEN `design-system-context.md` MAY 降级为 `interaction-design.md` 中的 Design System Context 章节；若仅引用 ≤5 个 token，SHOULD 直接列出 token 引用表
+- [ ] IF 涉及前端交互需求：按设计基线分级 gate（L1/L2/L3）判断是否可锁定 spec.md 与进入后续阶段；L3 级进入 Phase 6 前若仍缺少 L2 级以上基线，MUST 返回 Phase 2 补齐并重新锁定规格
 - [ ] 执行 `/speckit.plan` + `/plan-eng-review`，将结论写入 `specs/<feature-id>/arch-review.md`
-- [ ] IF 涉及前端交互需求：确认 `plan.md` 已引用 `interaction-design.md` 和 `design-system-context.md` 作为后续实现输入
+- [ ] IF 涉及前端交互需求：确认 `plan.md` 已引用 `interaction-design.md` 和 `design-system-context.md`（或 `interaction-design.md` 中的 Design System Context 章节）作为后续实现输入
 - [ ] **[P0-3]** IF 涉及 DB schema 变更：确认 `plan.md` 已包含迁移方案（兼容性分类、上线顺序、回滚脚本、staging dry-run 要求）
 - [ ] **[P0-4]** IF 涉及 API 变更：确认已先更新 `contracts/` 再写实现；breaking change 已在 `arch-review.md` 标注并获得架构确认
 - [ ] `/speckit.tasks` 生成任务列表
 - [ ] IF 涉及前端交互需求：确认 `tasks.md` 已按设计产物拆出页面结构实现、交互实现、状态处理、视觉验证、回归验证
 - [ ] IF 涉及前端 UI/UX，THEN `tasks.md` 中 MUST 包含设计还原验证任务
-- [ ] **[P0-1]** IF 涉及前端 UI 实现：确认 `tasks.md` 中每条前端任务已标注 `[复用]` / `[扩展]` / `[新增]`，且新增组件任务已说明理由
+- [ ] **[P0-1]** IF 涉及前端 UI 实现：确认 `tasks.md` 中每条前端任务已标注 `[复用]`/`[扩展]`/`[新增]`，且新增组件任务已说明理由
 - [ ] `/speckit.analyze` 在 `tasks.md` 生成后执行并通过
 - [ ] IF 并行开发：使用 `git worktree`，MUST NOT 切分支代替
 
 ### 6.3 实施过程中
 
-- [ ] 模型与推理档位遵循当前 CLI / 仓库默认配置，MUST NOT 在工作流文档中硬编码固定模型分工
+- [ ] 模型与推理档位遵循当前 CLI/仓库默认配置，MUST NOT 在工作流文档中硬编码固定模型分工
 - [ ] TDD：先写失败测试，再写实现
-- [ ] IF 需要专业判断或并行执行：先在 `plan.md` / `arch-review.md` 中明确判断结论；使用外部代理编排能力时，明确文件所有权、输入上下文与验收条件
+- [ ] IF 需要专业判断或并行执行：先在 `plan.md`/`arch-review.md` 中明确判断结论；使用外部代理编排能力时，明确文件所有权、输入上下文与验收条件
 - [ ] 每完成一个原子任务，执行 `/commit-message` 生成提交信息，确认后再提交；MUST NOT 直接调用 `git commit`；提交信息格式以该技能定义为准，默认使用中文，除非用户明确要求英文
 - [ ] 踩坑立即追加写入 `memory/issues.md`
 - [ ] 架构决策立即追加写入 `memory/decisions.md`
 - [ ] IF 发现规格有误：返回 Phase 2 正式修改，MUST NOT 绕过
-- [ ] IF 涉及前端交互需求：页面实现从 Phase 6 开始，输入 MUST 来自 `spec.md`、`interaction-design.md`（含「设计引用」章节中的设计基线）、`design-system-context.md`、`plan.md`、`tasks.md`；MUST NOT 在实施阶段新建或补写前端设计文档
+- [ ] IF 涉及前端交互需求：页面实现从 Phase 6 开始，输入 MUST 来自 `spec.md`、`interaction-design.md`（含「设计引用」章节中的设计基线）、`design-system-context.md`（或 `interaction-design.md` 中的 Design System Context 章节）、`plan.md`、`tasks.md`；MUST NOT 在实施阶段新建或补写前端设计文档；MUST 将 `DESIGN.md` 中的 design tokens 映射为 CSS 变量或 Tailwind 配置，MUST NOT 在组件中硬编码颜色/字体/间距值
 
 ### 6.4 上线前（关键 gate MUST 全过）
 
 - [ ] gitleaks Secret 扫描通过（pre-commit hook 自动触发，CI 二次校验）
 - [ ] `/review` 代码审查通过；安全敏感改动已追加安全专项审查，将结论写入 `specs/<feature-id>/review-findings.md`，修复后重审
 - [ ] `/qa` QA 验证通过，截图已存档（feature branch 默认 diff-aware）
-- [ ] IF 涉及前端交互需求：QA 已对照 `interaction-design.md`、`design-system-context.md` 及「设计引用」章节中的设计基线（在线链接或离线文件）验证关键页面结构、交互流转、状态矩阵、响应式规则；QA 报告已记录设计引用、关键页面截图、差异结论，并将差异标注为 `blocking` / `non-blocking` / `accepted`；若在线链接失效，则以最近一次导出的带时间戳截图/PDF 作为临时比对输入，并返回 Phase 2/spec 阶段补注退化基线
+- [ ] IF 涉及前端交互需求：QA 已对照 `interaction-design.md`、`design-system-context.md`（或 `interaction-design.md` 中的 Design System Context 章节）及「设计引用」章节中的设计基线（在线链接或离线文件）验证关键页面结构、交互流转、状态矩阵、响应式规则；QA 报告已记录设计引用、关键页面截图、差异结论，并将差异标注为 `blocking`/`non-blocking`/`accepted`；若在线链接失效，则以最近一次导出的带时间戳截图/PDF 作为临时比对输入，并返回 Phase 2/spec 阶段补注退化基线
 - [ ] IF QA 发现实现效果与设计基线不一致，THEN MUST 返回 Phase 6 修复；若设计基线缺失或错误，返回 Phase 2
 - [ ] IF 本次前面生成了 `/speckit.checklist`：其中阻断项已闭环
 - [ ] `/ship` → CI 全绿 + ≥ 1 人 Review Approve 后合并

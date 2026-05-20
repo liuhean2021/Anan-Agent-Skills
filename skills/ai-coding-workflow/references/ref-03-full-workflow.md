@@ -8,11 +8,11 @@
 
 ### 5.1 阶段主线与工具介入原则
 
-- AI Coding Workflow 以 `Phase 0~10 / 5B` 为唯一主线；`spec-kit`、`gstack`、外部代理编排能力、Context7 MCP、`gitleaks`、`memory` 等都按阶段介入
+- AI Coding Workflow 以 `Phase 0~10/5B` 为唯一主线；`spec-kit`、`gstack`、外部代理编排能力、Context7 MCP、`gitleaks`、`memory` 等都按阶段介入
 - `spec-kit` 主要提供规格、方案、任务、分析、实施骨架
 - `gstack` 主要提供方向评审、架构评审、审查、QA、发布、复盘能力
 - 外部代理编排能力主要用于并行实施或多模型交叉复核
-- Context7 优先通过 MCP 自动核对官方文档；无 MCP 时降级为 `use context7` / library ID / 官方文档，避免在方案或实施阶段产生 API 幻觉
+- Context7 优先通过 MCP 自动核对官方文档；无 MCP 时降级为 `use context7`/library ID/官方文档，避免在方案或实施阶段产生 API 幻觉
 - `gitleaks`、测试、CI、`memory/*` 等属于验证与沉淀能力，同样是工作流组成部分
 
 **阶段内能力选择**：
@@ -20,27 +20,98 @@
 | 情况 | 介入能力 |
 |------|--------|
 | 任务列表明确、完整功能、自动执行 | `/speckit.implement` |
-| 需要专业判断（复杂架构、安全、性能） | `plan.md` / `arch-review.md` 明确结论；必要时用外部代理编排能力复核 |
-| 需并行调用 Codex / Gemini 分工实施 | `/team`、`omc team N:codex "..."` 或 `/omc-teams` 兼容入口 |
+| 需要专业判断（复杂架构、安全、性能） | `plan.md`/`arch-review.md` 明确结论；必要时用外部代理编排能力复核 |
+| 需并行调用 Codex/Gemini 分工实施 | `/team`、`omc team N:codex "..."` 或 `/omc-teams` 兼容入口 |
 | 需多模型交叉复核实现方案 | `/ccg`、`/ask <model>` 或 `omc ask <model> ...` |
-| 需核对陌生库、新版本 SDK、官方 API | 优先使用 Context7 MCP 自动文档查验；无 MCP 时降级为 `use context7` / library ID / 官方文档 |
+| 需核对陌生库、新版本 SDK、官方 API | 优先使用 Context7 MCP 自动文档查验；无 MCP 时降级为 `use context7`/library ID/官方文档 |
 
 **gstack 降级规则**：IF 当前 host 未安装 gstack，THEN 本文件中的 `/review`、`/qa`、`/ship` 命令分别改为人工审查、手工测试或 CI 验证、宿主常规发布流程。
 
 ### 前端交互需求附加规则
 
 IF 任何 UI 可见变更（非纯逻辑/API 变更），THEN 视为前端交互需求，并统一遵守：
-- Phase 2 MUST 检查项目级 `docs/design-system/DESIGN.md` 是否存在；IF 不存在，THEN 生成最小版（品牌气质/颜色语义/字体层级/间距布局/组件使用原则/禁止事项）；IF 存在，THEN 直接引用。为当前 feature 生成 `specs/<feature-id>/design-system-context.md`。
-- Phase 2 MUST 产出 `interaction-design.md`，且包含「UI 设计图」与「UX 交互文档」两章；缺任一项时 `spec.md` 不得锁定。设计基线记录到「设计引用」章节。
+- Phase 2 MUST 检查项目级 `DESIGN.md` 是否存在；IF 涉及前端 UI/UX 且不存在，THEN 生成 `DESIGN.md`，遵循 Google Stitch DESIGN.md 基础格式；本工作流追加以下章节要求：`Responsive Behavior`/`Iteration Guide`。完成后 SHOULD 运行 `npx @google/design.md lint DESIGN.md` 验证。IF 存在，THEN 直接引用。
+  DESIGN.md 格式迭代参考：https://github.com/VoltAgent/awesome-design-md（含 73 个网站示例）。
+- Phase 2 MUST 产出 `interaction-design.md`，按设计基线完整度分三级 gate（见下方「设计基线分级 gate」）。设计基线记录到「设计引用」章节。`design-system-context.md` MAY 作为独立文件存在，也 MAY 降级为 `interaction-design.md` 中的「Design System Context」章节；若 feature 仅引用 DESIGN.md 中 ≤5 个 token，SHOULD 直接在 `interaction-design.md` 中列出 token 引用表，不必单独建文件。
 - 所有前端设计文档与设计基线 MUST 在 Phase 2/spec 阶段完成并锁定；Phase 3+ 只允许引用、拆解、实施、验证，MUST NOT 新建或补写 `DESIGN.md`、`interaction-design.md`、`design-system-context.md` 或设计引用。
-- 在线设计稿记录长久分享链接；离线文件记录文件名与路径；临时 `design-assets/` MUST 加入 `.gitignore`。
-- IF 没有在线设计稿、离线设计文件、截图、原型说明或明确线框图，THEN MUST 先补齐可视化设计基线，MUST NOT 进入 Phase 3 / Phase 4 / Phase 6。
-- Phase 3 的 `plan.md` MUST 引用 `interaction-design.md` 和 `design-system-context.md`，说明页面模块、交互状态、接口依赖、组件复用边界与设计系统规则适用范围。
+- 在线设计稿记录长久分享链接；离线文件记录文件名与路径；临时 `specs/<feature-id>/design-assets/` MUST 加入 `.gitignore`。
+- IF 无在线设计稿、离线设计文件、截图、原型说明或线框图，THEN 按「设计基线分级 gate」判断：L3 级允许以文字需求锁定 spec.md；进入 Phase 6 前若仍缺少 L2 级以上设计基线，MUST 返回 Phase 2 补齐并重新锁定规格。
+- Phase 3 的 `plan.md` MUST 引用 `interaction-design.md` 和 `design-system-context.md`（或 `interaction-design.md` 中的 Design System Context 章节），说明页面模块、交互状态、接口依赖、组件复用边界与设计系统规则适用范围。
 - IF 设计复杂度较高、评审风险较高、交互边界不清、涉及多页面关键路径或核心转化路径，THEN SHOULD 执行 `/plan-design-review`。
 - Phase 4 的前端任务 MUST 基于 `interaction-design.md` 拆解，并完成组件库扫描标注。前端任务 MUST 包含设计还原验证任务，明确截图/人工验收/视觉对比证据。
-- Phase 5 分析 MUST 纳入 `interaction-design.md` 和 `design-system-context.md`；Phase 6 实施 MUST 同时以 `spec.md`、`interaction-design.md`、`design-system-context.md`、`plan.md`、`tasks.md` 为输入；Phase 8 QA MUST 对照 `interaction-design.md`、`design-system-context.md` 与设计基线。
+- Phase 5 分析 MUST 纳入 `interaction-design.md` 和 `design-system-context.md`（或 `interaction-design.md` 中的 Design System Context 章节）；Phase 6 实施 MUST 同时以 `spec.md`、`interaction-design.md`、`design-system-context.md`（或 `interaction-design.md` 中的 Design System Context 章节）、`plan.md`、`tasks.md` 为输入；IF 涉及前端实施，THEN Agent MUST 将 `DESIGN.md` 中的 design tokens 映射为 CSS 变量或 Tailwind 配置，MUST NOT 在组件中硬编码颜色/字体/间距值。Phase 8 QA MUST 对照 `interaction-design.md`、`design-system-context.md`（或 `interaction-design.md` 中的 Design System Context 章节）与设计基线。
 - Phase 8 QA 报告 MUST 标注对照的设计引用、关键页面截图、差异结论；若存在偏差，MUST 标注是否阻断发布。若设计效果与目标基线不一致，MUST 返回 Phase 6 修复；若基线缺失或错误，返回 Phase 2。
 - 页面实现、组件开发、视觉还原只在 Phase 6 执行，MUST NOT 在需求阶段提前落代码。
+
+### 设计基线分级 gate（L1/L2/L3）
+
+IF 涉及前端交互需求，THEN 按以下三级判断是否可锁定 `spec.md`：
+
+| 级别 | 条件 | interaction-design.md 最低要求 | spec.md 锁定 | 进入 Phase 6 条件 |
+|------|------|-------------------------------|-------------|-------------------|
+| **L1 完整设计** | 有 Figma/蓝湖等在线设计稿，或 PDF/截图等离线设计文件 | 完整填写（页面结构 + 交互流转 + 状态矩阵 + 响应式适配 + 可访问性），「设计引用」章节记录设计稿链接或文件路径 | 可直接锁定 | 直接进入 |
+| **L2 文字+草图** | 有文字需求描述 + 草图/白板照片/线框图/原型说明 | 填写页面结构 + 交互流转 + 状态矩阵，「设计引用」标注「无正式设计稿，基于文字需求」 | 可直接锁定 | 直接进入，MAY 要求补充视觉参考 |
+| **L3 纯文字** | 仅有文字需求，无任何可视化参考 | 填写页面结构 + 状态矩阵 | 可锁定，但 `spec.md` MUST 标注「视觉细节待设计确认」 | 进入前若仍缺少 L2 级以上设计基线，MUST 返回 Phase 2 补齐并重新锁定规格 |
+
+> Agent MUST 在 Phase 2 结束时判定 design-level（L1/L2/L3）并写入 `interaction-design.md` 头部。
+
+### interaction-design.md 最小模板
+
+```md
+# Interaction Design
+
+> design-level: L1 | L2 | L3
+
+## 1. 设计引用
+- 设计稿链接/文件路径：（L1 必填；L2/L3 标注「无正式设计稿」）
+- 设计工具：
+- 最后更新：
+- 责任人：
+
+## 2. 页面结构
+- 页面路径/路由：
+- 布局描述（ASCII 或文字）：
+- 组件树：
+  - 页面容器
+    - 导航区
+    - 主内容区
+      - 列表/表格区
+      - 操作按钮区
+    - 页脚区
+
+## 3. 交互流转
+- 主流程（用户操作路径，按步骤描述）：
+  1. 用户进入页面 →
+  2. … →
+  3. … →
+- 分支流程（异常、取消、中断）：
+- 动画/过渡需求：
+
+## 4. 状态矩阵
+| 组件/区域 | default | loading | empty | error | success | disabled |
+|----------|---------|---------|-------|-------|---------|----------|
+| 页面整体 | ... | ... | ... | ... | ... | ... |
+| 列表区 | ... | ... | ... | ... | ... | ... |
+| 表单区 | ... | ... | — | ... | ... | ... |
+
+## 5. 响应式适配（L1 必填）
+- 断点策略：mobile (<768)/tablet (768-1024)/desktop (>1024)
+- 各断点关键差异：
+
+## 6. 可访问性（L1 必填）
+- 键盘导航路径：
+- 屏幕阅读器标注：
+- 色彩对比度检查：
+
+## 7. Design System Context
+- 引用方式：独立 `design-system-context.md`/本章节内联
+- DESIGN.md token 引用表：
+  | 用途 | token | 使用位置 |
+  |------|-------|----------|
+  | 主按钮背景 | `{components.button-primary.backgroundColor}` | ... |
+- 本功能适用的组件规则：
+- 不适用或禁止使用的样式：
+```
 
 ### 5.2 全流程（Phase 0 ~ Phase 10）
 
@@ -53,7 +124,7 @@ IF 任何 UI 可见变更（非纯逻辑/API 变更），THEN 视为前端交互
 **必做动作**：
 1. 执行 `specify init . --integration <agent-key>`（分布式团队可加 `--branch-numbering timestamp` 避免分支编号冲突；Codex CLI 常用 `--integration codex --integration-options="--skills"`），初始化 `.specify/` 目录
 2. 执行 `/speckit.constitution`，生成 `constitution.md`
-3. 补充 `AGENTS.md` / `CLAUDE.md`，写入项目规范
+3. 补充 `AGENTS.md`/`CLAUDE.md`，写入项目规范
 
 **产出物**：`.specify/memory/constitution.md`、`AGENTS.md`（或 `CLAUDE.md`）
 
@@ -125,7 +196,7 @@ IF 任务为小功能或 bug fix，THEN 可跳过本 Phase。
 当前结论依赖哪些假设成立。
 
 ## 11. 结论
-- 决策：进入 `spec` / 暂缓 / 放弃
+- 决策：进入 `spec`/暂缓/放弃
 - feature-id：
 - 负责人：
 - 日期：
@@ -153,13 +224,13 @@ IF 方向尚未确认、MVP 边界仍在摇摆、存在"先做哪个版本"争�
 5. IF 已执行 checklist 且仍暴露缺口，THEN MUST 回到 `spec.md` 补齐后再次执行 `/speckit.checklist`，直到问题闭环
 6. MUST NOT 通过重复执行 `/speckit.specify` 来补充规格——该命令会**覆盖**整个 `spec.md`，仅在初稿方向完全跑偏需要推倒重来时才使用
 7. 将用户故事、功能边界、验收标准、约束条件写全
-7a. IF 涉及前端交互需求，THEN MUST 检查项目级 `docs/design-system/DESIGN.md` 是否存在；IF 不存在，THEN 生成最小版（品牌气质/颜色语义/字体层级/间距布局/组件使用原则/禁止事项）；IF 存在，THEN 直接引用。为当前 feature 生成 `specs/<feature-id>/design-system-context.md`。
-8. IF 涉及前端交互需求，THEN 按「前端交互需求附加规则」补齐设计基线。MUST 产出 `interaction-design.md`，且包含「UI 设计图」与「UX 交互文档」两章；缺任一项时 `spec.md` 不得锁定
+7a. IF 涉及前端交互需求，THEN MUST 检查项目级 `DESIGN.md` 是否存在；IF 不存在，THEN 生成 `DESIGN.md`，遵循 Google Stitch DESIGN.md 基础格式；本工作流追加以下章节要求：`Responsive Behavior`/`Iteration Guide`；完成后 SHOULD 运行 `npx @google/design.md lint DESIGN.md` 验证。IF 存在，THEN 直接引用。为当前 feature 生成 `specs/<feature-id>/design-system-context.md`（MAY 降级为 `interaction-design.md` 中的 Design System Context 章节）。
+8. IF 涉及前端交互需求，THEN 按「前端交互需求附加规则」与「设计基线分级 gate」判定设计级别（L1/L2/L3），MUST 产出 `interaction-design.md`，并按对应级别填写模板章节
 9. 规格确认后锁定
 
 **产出物**：`specs/<feature-id>/spec.md`、`specs/<feature-id>/checklists/`、`specs/<feature-id>/interaction-design.md`（如适用）、`specs/<feature-id>/design-system-context.md`（如适用）
 
-**退出条件**：规格无歧义，checklist 已生成并闭环，规格已锁定；若涉及前端交互需求，则 Phase 2 对应的 `interaction-design.md`（含「UI 设计图」与「UX 交互文档」两章）、`design-system-context.md` 与设计基线已就位。
+**退出条件**：规格无歧义，checklist 已生成并闭环，规格已锁定；若涉及前端交互需求，则 Phase 2 对应的 design-level（L1/L2/L3）已判定，`interaction-design.md` 已按对应级别填写，`design-system-context.md`（或降级后的 Design System Context 章节）与设计基线已就位。
 
 > IF 后续阶段发现规格有误，THEN 代理 MUST 返回本 Phase 正式修改，MUST NOT 在实施阶段绕过规格直接改代码。
 >
@@ -197,7 +268,7 @@ IF 方向尚未确认、MVP 边界仍在摇摆、存在"先做哪个版本"争�
 
 ## 8. UI/UX 设计规范（IF 涉及用户界面）
 ### 8.1 设计交付物
-- 页面结构图（线框图 / 布局图）
+- 页面结构图（线框图/布局图）
 - 关键流转图（用户操作路径）
 - 组件复用说明（优先复用现有设计系统组件，MUST NOT 随意发明样式）
 - 可视化设计来源（设计文件、分享链接、截图、原型说明）
@@ -218,9 +289,9 @@ IF 功能涉及跨组件或跨页面的共享数据，THEN MUST 在规格锁定�
 
 | 状态/数据 | 归属层 | 说明 |
 |----------|--------|------|
-| 仅当前组件使用 | **Local**（useState / ref） | 无需跨组件共享 |
-| 跨页面 / 跨组件共享 | **Global**（Zustand / Redux / Pinia） | 需定义 store 模块名 |
-| 来自接口、需缓存/同步 | **Server State**（React Query / SWR / TanStack） | 需定义 query key 与失效策略 |
+| 仅当前组件使用 | **Local**（useState/ref） | 无需跨组件共享 |
+| 跨页面/跨组件共享 | **Global**（Zustand/Redux/Pinia） | 需定义 store 模块名 |
+| 来自接口、需缓存/同步 | **Server State**（React Query/SWR/TanStack） | 需定义 query key 与失效策略 |
 
 **填写规则**：
 - 每类"跨组件共享的数据"对应一行，说明归属层与原因
@@ -228,7 +299,7 @@ IF 功能涉及跨组件或跨页面的共享数据，THEN MUST 在规格锁定�
 - Phase 6 实施时，AI MUST 以本节定义为准，MUST NOT 自行决定状态归属层
 
 ### 8.3 响应式规则
-定义断点与适配策略（mobile / tablet / desktop）。
+定义断点与适配策略（mobile/tablet/desktop）。
 
 ### 8.4 可访问性基线
 - WCAG 2.1 AA 合规
@@ -239,7 +310,7 @@ IF 功能涉及跨组件或跨页面的共享数据，THEN MUST 在规格锁定�
 ## 9. 非功能需求
 | 维度 | 要求 |
 |------|------|
-| 性能 | 页面加载 / API 响应时间目标 |
+| 性能 | 页面加载/API 响应时间目标 |
 | 兼容性 | 浏览器、设备、操作系统范围 |
 | 安全 | 认证、授权、数据加密、输入校验 |
 | 隐私合规 | 数据收集、存储、传输合规要求 |
@@ -252,7 +323,7 @@ IF 功能涉及跨组件或跨页面的共享数据，THEN MUST 在规格锁定�
 还没确认、需要补充的问题。
 
 ## 12. 锁定记录
-- 状态：draft / clarified / locked
+- 状态：draft/clarified/locked
 - feature-id：
 - 负责人：
 - 日期：
@@ -273,9 +344,9 @@ IF 功能涉及跨组件或跨页面的共享数据，THEN MUST 在规格锁定�
 **进入条件**：WHEN Phase 2 已完成，规格已锁定。适用范围：小功能及以上。
 
 **必做动作**：
-1. IF 涉及陌生库、新版本 SDK、或近期变化的 API，THEN 优先使用 Context7 MCP 自动文档查验；无 MCP 时降级为 `use context7` / library ID / 官方文档，防 API 幻觉，再确定方案
+1. IF 涉及陌生库、新版本 SDK、或近期变化的 API，THEN 优先使用 Context7 MCP 自动文档查验；无 MCP 时降级为 `use context7`/library ID/官方文档，防 API 幻觉，再确定方案
 2. 执行 `/speckit.plan "<技术栈>"`，生成 `plan.md`、`research.md`、`data-model.md`、`contracts/`
-3. IF 涉及前端交互需求，THEN `plan.md` MUST 引用 Phase 2 已锁定的 `interaction-design.md` 和 `design-system-context.md` 作为前端实现输入，并按触发条件决定是否执行 `/plan-design-review`；若任一设计文档或设计基线缺失，MUST 返回 Phase 2，MUST NOT 在本阶段补写
+3. IF 涉及前端交互需求，THEN `plan.md` MUST 引用 Phase 2 已锁定的 `interaction-design.md` 和 `design-system-context.md`（或 `interaction-design.md` 中的 Design System Context 章节）作为前端实现输入，并按触发条件决定是否执行 `/plan-design-review`；若任一设计文档或设计基线缺失，MUST 返回 Phase 2，MUST NOT 在本阶段补写
 4. 执行 `/plan-eng-review`，深度审查图表、边界条件、失败模式
 5. 将架构评审结论写入 `specs/<feature-id>/arch-review.md`
 6. 将架构决策追加写入 `memory/decisions.md`
@@ -288,7 +359,7 @@ IF 功能涉及跨组件或跨页面的共享数据，THEN MUST 在规格锁定�
 
 **产出物**：`specs/<feature-id>/plan.md`、`specs/<feature-id>/research.md`、`specs/<feature-id>/data-model.md`、`specs/<feature-id>/contracts/`、`specs/<feature-id>/arch-review.md`、`memory/decisions.md`（追加）
 
-**退出条件**：技术方案已通过架构评审，产出物已写入；若涉及前端交互需求，则 `plan.md` 已引用 `interaction-design.md` 和 `design-system-context.md` 并说明页面模块、交互状态、接口依赖、组件复用边界与设计系统规则适用范围；若涉及 DB 迁移则迁移方案已包含在 `plan.md`；若涉及 API 变更则 `contracts/` 已先于实现更新。
+**退出条件**：技术方案已通过架构评审，产出物已写入；若涉及前端交互需求，则 `plan.md` 已引用 `interaction-design.md` 和 `design-system-context.md`（或 `interaction-design.md` 中的 Design System Context 章节）并说明页面模块、交互状态、接口依赖、组件复用边界与设计系统规则适用范围；若涉及 DB 迁移则迁移方案已包含在 `plan.md`；若涉及 API 变更则 `contracts/` 已先于实现更新。
 
 ---
 
@@ -316,7 +387,7 @@ IF 功能涉及跨组件或跨页面的共享数据，THEN MUST 在规格锁定�
 **进入条件**：WHEN Phase 4 已完成，且小功能/新功能类改动开始实施前。bug fix 默认走 Phase 5B 简化流。
 
 **必做动作**：
-1. Claude 执行 `/speckit.analyze`，Codex 执行 `$speckit-analyze`，对 `spec.md`、`plan.md`、`tasks.md` 做只读一致性分析；涉及前端交互需求时按附加规则纳入 `interaction-design.md` 和 `design-system-context.md`
+1. Claude 执行 `/speckit.analyze`，Codex 执行 `$speckit-analyze`，对 `spec.md`、`plan.md`、`tasks.md` 做只读一致性分析；涉及前端交互需求时按附加规则纳入 `interaction-design.md` 和 `design-system-context.md`（或 `interaction-design.md` 中的 Design System Context 章节）
 2. 按验收标准先写失败测试
 3. IF 后续实现预计会调用外部 agent，THEN 先在 `tasks.md` 标注可并行项与上下文边界，避免多个 agent 重复改同一文件
 4. 执行 `/commit-message` 生成提交信息，等待确认后再执行提交；提交格式以该技能定义为准，如需标识 `<feature-id>`，可写入摘要或说明列表
@@ -355,7 +426,7 @@ IF 功能涉及跨组件或跨页面的共享数据，THEN MUST 在规格锁定�
 
 **必做动作**：
 1. IF 任务列表明确且为完整功能，THEN Claude 执行 `/speckit.implement`，Codex 执行 `$speckit-implement`
-2. IF 需要专业判断（复杂架构、安全、性能），THEN 先在 `plan.md` / `arch-review.md` 中明确判断结论；必要时使用外部代理编排能力复核方案
+2. IF 需要专业判断（复杂架构、安全、性能），THEN 先在 `plan.md`/`arch-review.md` 中明确判断结论；必要时使用外部代理编排能力复核方案
 3. IF 存在 `[P]` 并行任务，且已安装 `oh-my-claudecode`，THEN MAY 用以下方式接入外部 agent：
    - `/team 3:executor "implement tasks <task-id list> with clear file ownership"`
    - `omc team 2:codex "implement task <task-id> in <path> only"`
@@ -364,7 +435,7 @@ IF 功能涉及跨组件或跨页面的共享数据，THEN MUST 在规格锁定�
 5. 每完成一个原子任务，MUST 立即执行 `/commit-message` 生成提交信息，等待确认后再提交；MUST NOT 直接调用 `git commit` 绕过该步骤；提交信息格式以 `/commit-message` 技能定义为准，默认使用中文，除非用户明确要求英文
 6. IF 遇到问题/踩坑，THEN MUST 将内容追加写入 `memory/issues.md`
 7. IF 发现规格有误，THEN MUST 返回 Phase 2 正式修改，重走 Phase 3，MUST NOT 绕过
-8. IF 涉及前端交互需求，THEN 页面实现、组件开发与视觉还原 MUST 同时以 `spec.md`、`interaction-design.md`、`design-system-context.md`、`plan.md`、`tasks.md` 为输入，按「前端交互需求附加规则」执行，MUST NOT 临场发挥、绕过设计基线，或在 Phase 6 新建/补写前端设计文档
+8. IF 涉及前端交互需求，THEN 页面实现、组件开发与视觉还原 MUST 同时以 `spec.md`、`interaction-design.md`、`design-system-context.md`（或 `interaction-design.md` 中的 Design System Context 章节）、`plan.md`、`tasks.md` 为输入，按「前端交互需求附加规则」执行，MUST NOT 临场发挥、绕过设计基线，或在 Phase 6 新建/补写前端设计文档
 
 **产出物**：原子提交，`memory/issues.md`（如有追加）
 
@@ -400,7 +471,7 @@ IF 功能涉及跨组件或跨页面的共享数据，THEN MUST 在规格锁定�
 **必做动作**：
 1. 执行 `/qa`，生成 `qa-reports/`（feature branch 默认 diff-aware，含截图）
 2. 对照 checklist 逐条确认验收标准
-3. IF 涉及前端交互需求，THEN 按「前端交互需求附加规则」对照 `interaction-design.md`、`design-system-context.md` 与设计基线验证关键页面结构、交互流转、状态矩阵与响应式规则，并在 QA 报告中标注设计引用、关键页面截图、差异结论；差异需标注 `blocking` / `non-blocking` / `accepted`
+3. IF 涉及前端交互需求，THEN 按「前端交互需求附加规则」对照 `interaction-design.md`、`design-system-context.md`（或 `interaction-design.md` 中的 Design System Context 章节）与设计基线验证关键页面结构、交互流转、状态矩阵与响应式规则，并在 QA 报告中标注设计引用、关键页面截图、差异结论；差异需标注 `blocking`/`non-blocking`/`accepted`
 
 **产出物**：`.gstack/qa-reports/`（含截图）
 
