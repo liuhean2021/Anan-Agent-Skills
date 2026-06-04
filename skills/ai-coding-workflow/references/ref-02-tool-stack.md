@@ -60,13 +60,13 @@ AI Coding Workflow 以 `Phase 0~10 / 5B` 为主线推进。以下工具与角色
 ### 10.1 spec-kit
 
 ```bash
-# 安装（持久化，推荐）— 将 vX.Y.Z 替换为最新 release tag
+# 安装（持久化，推荐）— 锁定最新 release tag（替换 vX.Y.Z 为实际版本号）
 uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@vX.Y.Z
 
 # 或安装 main 分支最新（可能包含未发布变更，不推荐生产）
 uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
 
-# 升级 — 同样建议锁定版本 tag
+# 升级 — 同样锁定版本 tag
 uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git@vX.Y.Z
 
 # 一次性使用（无需安装）
@@ -79,8 +79,11 @@ specify init . --integration <agent-key> --force                  # 强制合并
 specify init . --integration codex --integration-options="--skills"  # Codex CLI 常用写法：同时安装 agent skills
 specify init . --integration <agent-key> --branch-numbering timestamp  # 时间戳分支编号（分布式团队推荐，避免编号冲突）
 specify check                                       # 验证工具是否就绪
-specify status                                      # 查看当前 feature 状态（v0.3.1+）
-specify doctor                                      # 项目健康诊断（v0.3.0+）
+specify version                                     # 显示版本与系统信息
+specify version --features                          # 显示本地 CLI 功能标记
+specify version --features --json                   # 以 JSON 格式输出功能标记（CI/脚本用）
+specify self check                                  # 检查 CLI 是否为最新版
+specify self upgrade                                # 自动升级 CLI 到最新版
 
 # 核心命令（使用顺序）
 /speckit.constitution            # 项目原则（一次性）
@@ -89,28 +92,39 @@ specify doctor                                      # 项目健康诊断（v0.3.
 /speckit.checklist               # 需求质量 checklist（plan 前执行，检查需求完整性/清晰度/一致性，不是代码验收）
 /speckit.plan "技术栈"           # 技术方案
 /speckit.tasks                   # 任务拆解
+/speckit.taskstoissues           # 将 tasks.md 转为 GitHub Issues（可选，在 tasks 后、implement 前执行）
 /speckit.analyze                 # 跨文档一致性分析（tasks 后、implement 前运行）
 /speckit.implement               # 执行实现
 
 # Codex CLI 语法（skills integration 模式，与 /speckit.* 等价）
-$speckit-constitution / $speckit-specify / $speckit-clarify / $speckit-checklist / $speckit-plan / $speckit-tasks / $speckit-analyze / $speckit-implement
+$speckit-constitution / $speckit-specify / $speckit-clarify / $speckit-checklist / $speckit-plan / $speckit-tasks / $speckit-taskstoissues / $speckit-analyze / $speckit-implement
 
 # Extensions：扩展新能力（Jira/Linear/Azure DevOps/代码审查等）
-specify extension search             # 搜索可用扩展
-specify extension add <name>         # 安装扩展（写入 .claude/commands/）
 specify extension list               # 列出已安装扩展
-specify extension remove <name>      # 卸载扩展
+specify extension add <name>         # 安装扩展（写入 .claude/commands/；支持 --from URL、--dev 本地目录、--priority）
+specify extension remove <name>      # 卸载扩展（--keep-config 保留配置、--force 跳过确认）
+specify extension search [query]     # 搜索可用扩展（--tag、--author、--verified 过滤）
+specify extension info <name>        # 查看扩展详情
+specify extension catalog list       # 列出已配置的扩展目录
+specify extension catalog add <url>  # 添加扩展目录（--name、--priority、--install-allowed）
+specify extension catalog remove <name>  # 移除扩展目录
 
 # Presets：自定义模板格式（规范化 spec/plan/tasks 输出风格）
-specify preset search                # 搜索可用预设
-specify preset add <name>            # 安装预设
 specify preset list                  # 列出已安装预设
-specify preset enable <name>         # 启用预设（v0.3.2+）
-specify preset disable <name>        # 禁用预设（保留安装，暂时停用；v0.3.2+）
+specify preset add <name>            # 安装预设（--from URL、--dev 本地目录、--priority）
 specify preset remove <name>         # 卸载预设
+specify preset search [query]        # 搜索可用预设（--tag、--author 过滤）
+specify preset info <name>           # 查看预设详情
+specify preset enable <name>         # 启用预设
+specify preset disable <name>        # 禁用预设（保留安装，暂时停用）
+specify preset set-priority <id> <n> # 设置预设优先级（数字越小优先级越高）
+specify preset resolve <template>    # 查看某个模板在解析栈中的来源（调试用）
+specify preset catalog list          # 列出已配置的预设目录
+specify preset catalog add <url>     # 添加预设目录（--name、--priority、--install-allowed）
+specify preset catalog remove <name> # 移除预设目录
 ```
 
-> **Extensions vs Presets**：Extensions 增加新命令（集成外部工具），Presets 覆盖现有模板格式（定制输出风格）。两者可叠加，优先级：project overrides > presets > extensions > core。
+> **Extensions vs Presets**：Extensions 增加新命令（集成外部工具），Presets 覆盖现有模板格式（定制输出风格）。两者可叠加，优先级：project overrides > presets > extensions > core。扩展和预设均支持通过目录（catalog）发现和安装，目录配置分别存储在 `.specify/extension-catalogs.yml` 和 `.specify/preset-catalogs.yml`。
 
 ### 10.2 gstack
 
@@ -231,6 +245,7 @@ chmod +x .git/hooks/pre-commit
 # specify-cli（官方来自 GitHub tag，勿用 PyPI 同名包）
 uv tool list 2>/dev/null | grep specify-cli
 specify version 2>/dev/null
+specify self check 2>/dev/null
 
 # gitleaks
 brew outdated gitleaks 2>/dev/null

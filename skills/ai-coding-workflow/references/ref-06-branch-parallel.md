@@ -10,12 +10,29 @@
 
 ```
 main（保护分支，只允许 PR 合并）
-  ├── feature/xxx   ← 短周期，生命周期 ≤ 2 天
-  ├── fix/xxx
-  └── release/x.x  ← 仅需单独维护版本时才开
+  ├── username/feature/xxx   ← 示例，IF 团队无既有规范可用；短周期，生命周期 ≤ 2 天
+  ├── username/fix/xxx
+  └── username/release/x.x  ← 仅需单独维护版本时才开；release 前缀可选
 ```
 
+**变体：双层基干（`dev` → `main`）**
+IF 项目需要稳定 branch 供多团队并行集成验证，THEN MAY 在 `main` 与功能分支之间增设 `dev` 基干：
+
+```
+main（保护分支，稳定可发布）
+  └── dev（集成验证分支，CI 全绿）
+        ├── username/feature/xxx
+        ├── username/fix/xxx
+        └── username/feat-YYYYMMDD   ← 短日期命名备选
+```
+
+**规则（dev 变体）：**
+- 功能分支从 `dev` 创建，合并回 `dev` 验证
+- 验证通过后，由 `dev` 合入 `main`
+- `main` 始终稳定可构建/可部署
+
 **规则：**
+- 多人并行且无其他命名规范时，非 `main` 分支 SHOULD 以 `username/`（如用户名）开头，避免协同时分支名冲突
 - `main` 分支 MUST 设置保护规则：禁止 force push，PR 合并前 CI MUST 全绿
 - 功能分支生命周期 MUST ≤ 2 天；IF 超过 2 天 THEN 拆分任务或执行频繁 rebase
 - CODEOWNERS 文件 MUST 定义核心模块强制审批人

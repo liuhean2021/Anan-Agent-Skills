@@ -51,6 +51,7 @@ description: 当用户需要统一的 AI 编程工作流时使用，涵盖新项
 | checklist | `/speckit.checklist` | `$speckit-checklist` | 手动 checklist |
 | plan | `/speckit.plan` | `$speckit-plan` | 需安装 spec-kit |
 | tasks | `/speckit.tasks` | `$speckit-tasks` | 手动任务拆解 |
+| taskstoissues | `/speckit.taskstoissues` | `$speckit-taskstoissues` | 手动在 GitHub 创建 Issues |
 | analyze | `/speckit.analyze` | `$speckit-analyze` | 手动一致性核对 |
 | implement | `/speckit.implement` | `$speckit-implement` | 手工实施 |
 | review | `/review` | `/review`（若 host 已装 gstack） | 人工审查/CI |
@@ -209,7 +210,7 @@ Phase 9：发布（按 Phase 9 发布链路执行）
 | 工具 | 升级命令 |
 |------|---------|
 | gstack | `/gstack-upgrade` |
-| specify-cli（CLI） | `uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git@vX.Y.Z` |
+| specify-cli（CLI） | `uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git@vX.Y.Z && uv cache clean` |
 | spec-kit 项目文件 | `specify init --here --force --integration <agent-key>` |
 | gitleaks | `brew upgrade gitleaks` |
 | oh-my-claudecode | `omc update` 或 `npm i -g oh-my-claude-sisyphus@latest`（npm 发布包名，项目品牌名相同）；刷新 config 需另跑 `omc setup`、`/setup` 或 `/omc-setup` |
@@ -224,8 +225,8 @@ Phase 9：发布（按 Phase 9 发布链路执行）
 
 ```bash
 # 开两条并行 feature 线
-git worktree add ../project-feature-a feature/a
-git worktree add ../project-feature-b feature/b
+git worktree add ../project-feature-a username_a/feature/report-page
+git worktree add ../project-feature-b username_b/feature/auth-refactor
 
 # 各自独立 Claude Code 实例
 cd ../project-feature-a && claude

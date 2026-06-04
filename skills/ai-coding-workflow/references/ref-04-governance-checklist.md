@@ -52,6 +52,10 @@
 - [ ] IF 方向未定、MVP 边界未定、或影响重大：先执行 `/office-hours`，再执行 `/plan-ceo-review`，将结论写入 `specs/<feature-id>/ceo-review.md`
 - [ ] IF 涉及陌生库、新版本 SDK、或近期变化的工具行为：优先使用 Context7 MCP 自动文档查验；无 MCP 时降级为 `use context7`/library ID/官方文档，再进入规格/方案动作
 - [ ] IF 方向已定且需求明确：执行 `/speckit.specify` + `/speckit.clarify`，锁定规格（变更须回 Phase 2 正式修改）
+- [ ] `spec.md`、`plan.md` 等文档满足"中文为主、英文为辅"原则：大量英文名词已追加中文标注，未标注的 MUST 返回补充
+- [ ] `spec.md` 中已包含边界情况章节，或明确标注不适用
+- [ ] `spec.md` 中已包含关键实体（Key Entities）章节（IF 涉及多个业务概念）
+- [ ] IF 验收标准数量较多（≥ 8 条）：建议为每条分配编号（如 AC-001），方便逐项勾选追踪
 - [ ] 推荐在 `/speckit.plan` 前执行 `/speckit.checklist`；复杂需求、高风险或高歧义需求 MUST 执行，并补齐需求完整性/清晰度/一致性问题
 - [ ] IF 涉及前端交互需求：在锁定规格前补齐 `specs/<feature-id>/interaction-design.md`
 - [ ] IF 涉及前端 UI/UX，THEN 规格锁定前 MUST 判定 design-level（L1/L2/L3），确认 `interaction-design.md` 已按对应级别填写模板章节（L1 完整填写：页面结构 + 交互流转 + 状态矩阵 + 响应式适配 + 可访问性；L2 填写页面结构、交互流转与状态矩阵；L3 填写页面结构与状态矩阵）
@@ -68,7 +72,7 @@
 - [ ] `/speckit.tasks` 生成任务列表
 - [ ] IF 涉及前端交互需求：确认 `tasks.md` 已按设计产物拆出页面结构实现、交互实现、状态处理、视觉验证、回归验证
 - [ ] IF 涉及前端 UI/UX，THEN `tasks.md` 中 MUST 包含设计还原验证任务
-- [ ] **[P0-1]** IF 涉及前端 UI 实现：确认 `tasks.md` 中每条前端任务已标注 `[复用]`/`[扩展]`/`[新增]`，且新增组件任务已说明理由
+- [ ] **[P0-1]** IF 涉及前端 UI 实现且项目存在组件库、设计系统或可复用 UI 层：确认 `tasks.md` 中每条前端任务已标注 `[复用]`/`[扩展]`/`[新增]`，且新增组件任务已说明理由
 - [ ] `/speckit.analyze` 在 `tasks.md` 生成后执行并通过
 - [ ] IF 并行开发：使用 `git worktree`，MUST NOT 切分支代替
 
