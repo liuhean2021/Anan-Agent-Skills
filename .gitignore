@@ -8,3 +8,4 @@ drafts/
 docs/review/
 .omx/
 claude-code-params.txt
+.playwright-mcp/
