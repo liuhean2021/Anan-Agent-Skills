@@ -27,6 +27,8 @@
 
 **gstack 降级规则**：IF 当前 host 未安装 gstack，THEN 本文件中的 `/review`、`/qa`、`/ship` 命令分别改为人工审查、手工测试或 CI 验证、宿主常规发布流程。
 
+**Superpowers 纪律层**：使用 ai-coding-workflow 时 Superpowers 插件 MUST 已安装（见 `ref-02 § 10.5`、`§ 10.6.B`）；未安装 MUST NOT 进入 Phase 6+。阶段顺序与验证铁律见 `ref-09-verification-gate.md`；各 Phase 退出前须满足该文件 § 13.4 纪律层要求。
+
 ### 前端交互需求附加规则
 
 IF 任何 UI 可见变更（非纯逻辑/API 变更），THEN 视为前端交互需求，并统一遵守：
@@ -171,7 +173,8 @@ IF 组件存在多状态流转（如加载→空→数据→错误→重试）�
 **必做动作**：
 1. 执行 `specify init . --integration <agent-key>`（分布式团队可加 `--branch-numbering timestamp` 避免分支编号冲突；Codex CLI 常用 `--integration codex --integration-options="--skills"`），初始化 `.specify/` 目录
 2. 执行 `/speckit.constitution`，生成 `constitution.md`
-3. 补充 `AGENTS.md`/`CLAUDE.md`，写入项目规范
+3. 补充 `AGENTS.md`/`CLAUDE.md`，写入项目规范（SHOULD 包含项目验证命令，供 `ref-09` Gate Function 使用）
+4. 执行 Superpowers 必装检查（`ref-02-tool-stack.md § 10.6.B`）；FAIL 则完成安装后再进入 Phase 6+
 
 **产出物**：`.specify/memory/constitution.md`、`AGENTS.md`（或 `CLAUDE.md`）
 
@@ -251,7 +254,7 @@ IF 组件存在多状态流转（如加载→空→数据→错误→重试）�
 >
 > 若 `spec.md`、`interaction-design.md`、`plan.md` 等文档中出现大量未标注的英文名词，则视为不满足本条原则，MUST 返回补充中文标注。
 
-**退出条件**：上述三项均已完成。
+**退出条件**：上述四项均已完成；Superpowers 必装检查 PASS。
 
 ---
 
@@ -825,14 +828,14 @@ IF 功能涉及 UI 组件、服务状态、任务生命周期、CLI 执行或多
 2. 定位并修复
 3. 执行 `/review`（仅审改动范围）
 4. IF 涉及鉴权、支付、隐私、权限、密钥、数据边界等安全敏感改动，THEN 追加安全专项审查，并将结论写入 `specs/<feature-id>/review-findings.md`，修复后重审
-5. 确认测试通过
+5. 确认测试通过（MUST 按 `ref-09-verification-gate.md` Gate Function 执行，附 fresh 测试命令输出）
 6. 执行 `/qa`（feature branch 默认 diff-aware）
 7. 执行 `/ship`
 8. 将踩坑内容追加写入 `memory/issues.md`
 
 **产出物**：复现测试、修复提交、`memory/issues.md`（追加）
 
-**退出条件**：缺陷已复现、已修复、验证通过，并完成审查与发布动作。
+**退出条件**：缺陷已复现、已修复；步骤 5 MUST 经 `ref-09` Gate Function 验证并附 fresh 命令输出；审查与发布动作已完成。
 
 > 本简化流是 bug fix 特例，MUST NOT 视为完整 Phase 5/6 的等价替身。若修复过程实际演变为新增能力、范围调整或方案重构，THEN MUST 返回 Phase 2 正式建模。
 
@@ -857,7 +860,7 @@ IF 功能涉及 UI 组件、服务状态、任务生命周期、CLI 执行或多
 
 **产出物**：原子提交，`memory/issues.md`（如有追加）
 
-**退出条件**：所有原子任务完成，测试全部通过（绿灯）。
+**退出条件**：所有原子任务完成，测试全部通过（绿灯）；退出 Phase 6 前 MUST freshly run 项目验证命令（见 `ref-09 § 13.4`），禁止无输出宣称实施完成。
 
 ---
 
@@ -893,7 +896,7 @@ IF 功能涉及 UI 组件、服务状态、任务生命周期、CLI 执行或多
 
 **产出物**：`.gstack/qa-reports/`（含截图）
 
-**退出条件**：所有验收条目通过，截图已存档；若涉及前端交互需求，则设计对照验证已通过，QA 报告已记录设计引用、关键页面截图、差异结论与差异分级。若设计效果与目标基线不一致，MUST 返回 Phase 6 修复；若基线缺失或错误，返回 Phase 2。
+**退出条件**：所有验收条目通过，截图已存档；若涉及前端交互需求，则设计对照验证已通过，QA 报告已记录设计引用、关键页面截图、差异结论与差异分级。若设计效果与目标基线不一致，MUST 返回 Phase 6 修复；若基线缺失或错误，返回 Phase 2。Phase 8 内每条验收结论 MUST 符合 `ref-09` Iron Law（附 fresh 验证证据）。
 
 ---
 

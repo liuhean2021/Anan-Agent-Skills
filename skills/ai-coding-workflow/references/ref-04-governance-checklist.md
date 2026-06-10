@@ -42,13 +42,15 @@
 ### 6.1 项目启动（一次性）
 
 - [ ] `specify init . --integration <agent-key>` 初始化 spec-kit（Codex CLI 常用 `--integration codex --integration-options="--skills"`）
+- [ ] **Superpowers 插件已安装**（使用 ai-coding-workflow 时 MUST；见 `ref-02 § 10.6.B`）
 - [ ] `/speckit.constitution` 建立项目原则
 - [ ] 补充 `AGENTS.md`/`CLAUDE.md`
 - [ ] 确认 Context7 MCP 已启用；无 MCP 时明确降级路径为 `use context7`/library ID/官方文档
 
 ### 6.2 每个功能开始前
 
-- [ ] 按 Section 1.1 判断任务规模，确定起始 Phase
+- [ ] **Superpowers 必装检查 PASS**（若尚未在 Phase 0 确认）
+- [ ] 按 Section 1.1 判断任务规模，确定起始 Phase；**禁止无产出物跳阶段**（`ref-09 § 13.2`）
 - [ ] IF 方向未定、MVP 边界未定、或影响重大：先执行 `/office-hours`，再执行 `/plan-ceo-review`，将结论写入 `specs/<feature-id>/ceo-review.md`
 - [ ] IF 涉及陌生库、新版本 SDK、或近期变化的工具行为：优先使用 Context7 MCP 自动文档查验；无 MCP 时降级为 `use context7`/library ID/官方文档，再进入规格/方案动作
 - [ ] IF 方向已定且需求明确：执行 `/speckit.specify` + `/speckit.clarify`，锁定规格（变更须回 Phase 2 正式修改）
@@ -89,6 +91,7 @@
 
 ### 6.4 上线前（关键 gate MUST 全过）
 
+- [ ] **验证铁律**：所有完成/通过类结论已附本消息内 freshly run 的验证命令输出（`ref-09 § 13.3`）
 - [ ] gitleaks Secret 扫描通过（pre-commit hook 自动触发，CI 二次校验）
 - [ ] `/review` 代码审查通过；安全敏感改动已追加安全专项审查，将结论写入 `specs/<feature-id>/review-findings.md`，修复后重审
 - [ ] `/qa` QA 验证通过，截图已存档（feature branch 默认 diff-aware）

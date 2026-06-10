@@ -1,6 +1,6 @@
 ---
 name: ai-coding-workflow
-description: 当用户需要统一的 AI 编程工作流时使用，涵盖新项目、新功能、bug fix、规划、代码审查、QA、发布及存量项目接入，代理据此将任务路由至正确的上游工具（spec-kit/gstack）和对应阶段。
+description: 当用户需要统一的 AI 编程工作流时使用，涵盖新项目、新功能、bug fix、规划、代码审查、QA、发布及存量项目接入。使用本技能时 Superpowers 插件必装；代理将任务路由至 spec-kit/gstack 等阶段能力，并强制 Phase 顺序与完成前验证（ref-09）。
 ---
 
 > **⚠️ 初次安装必做**：将本技能加入全局强制规则 → 跳至文末「[初次配置](#初次配置全局强制生效)」章节，完成后再回来阅读。
@@ -10,26 +10,26 @@ description: 当用户需要统一的 AI 编程工作流时使用，涵盖新项
 > | 文件 | 内容 |
 > |------|------|
 > | `references/ref-01-task-routing.md` | §0 规范导言（术语/MUST-SHOULD-MAY/Phase 结构规范）+ §1 任务路由（任务类型→Phase表、命令速查、场景→命令映射）+ §4 文档结构（文件路径速查表） |
-> | `references/ref-02-tool-stack.md` | §2 工具体系总览 + §10 各工具详细说明（spec-kit/gstack/OMC/gitleaks/自检）+ §11 参考来源 |
+> | `references/ref-02-tool-stack.md` | §2 工具体系总览 + §10 各工具详细说明（spec-kit/gstack/Superpowers/OMC/gitleaks/自检）+ §11 参考来源 |
 > | `references/ref-03-full-workflow.md` | §5 完整开发工作流 Phase 0~10（含 ceo-review 模板、spec 模板） |
 > | `references/ref-04-governance-checklist.md` | §3 AI治理（数据边界/高风险操作/人工责任/留痕）+ §6 最佳实践清单（5组 checklist） |
 > | `references/ref-05-legacy-onboarding.md` | §7 存量项目接入（三档策略 A/B/C + Bug Fix 简化流程） |
 > | `references/ref-06-branch-parallel.md` | §8 分支策略（主干开发、PR合并规则）+ §9 并行开发（Git Worktree + OMC 多代理选型） |
 > | `references/ref-07-advanced-practices.md` | §12 进阶实践（P1 测试分层/依赖安全/DORA/Hooks；P2 AI信任边界/环境策略/合规审查/成本管理） |
 > | `references/ref-08-host-installation-and-cc-switch.md` | Claude Code/Codex/Gemini 安装 + CC Switch provider/model 切换 |
+> | `references/ref-09-verification-gate.md` | §13 验证铁律 + 阶段顺序纪律（Superpowers 横切层、Iron Law、Gate Function） |
 
 # AI Coding 工作流
 
 **核心原则**：规格驱动 → 测试先行 → 最小改动 → 审查验证 → 持续复盘  
-**适用**：Claude Code CLI 主导的 AI 辅助开发（新项目/新功能/bug fix/存量接入）
+**纪律层**：使用本技能时 **Superpowers 插件必装**；Phase 按文档顺序推进；任何完成宣称 **必须附 fresh 验证证据**（详见 `references/ref-09-verification-gate.md`）  
+**适用**：按 ai-coding-workflow 推进的 AI 辅助开发（新项目/新功能/bug fix/存量接入）；与具体 Agent / IDE 无关
 
 **何时使用**：当用户要你按统一研发流程处理开发任务时使用，典型包括：新项目、新功能、bug fix、存量项目接入、代码审查、QA、发布、工具升级、并行开发。
 
 **不适用**：纯闲聊、单次信息查询、纯文案改写、纯翻译、仅做简短说明而不进入研发流程的场景。
 
-本技能中的“工作流”默认指**统一的 AI Coding Workflow**。`Phase 0~10` 与 `Phase 5B` 是唯一主线阶段定义；`spec-kit`、`gstack`、外部代理编排能力、Context7 MCP、`gitleaks`、`git worktree`、`AGENTS.md/CLAUDE.md/memory` 等都属于按阶段介入的工作流能力，MUST NOT 理解为彼此分离的并行流程。
-
-本技能是独立技能，不依赖其他技能。涉及前端实施或视觉验证时，本技能只定义通用产物与阶段 gate；具体执行可由宿主 Agent、人工流程或其他前端工具完成，不要求安装任何特定前端技能。
+本技能中的“工作流”默认指**统一的 AI Coding Workflow**。`Phase 0~10` 与 `Phase 5B` 是唯一主线阶段定义；`Superpowers`（纪律层，**使用本技能时必装**）、`spec-kit`、`gstack`、外部代理编排能力、Context7 MCP、`gitleaks`、`git worktree`、`AGENTS.md/CLAUDE.md/memory` 等都属于按阶段介入的工作流能力，MUST NOT 理解为彼此分离的并行流程。
 
 详细阶段、工具映射与治理规则见下方章节和 `references/`。
 
@@ -38,6 +38,8 @@ description: 当用户需要统一的 AI 编程工作流时使用，涵盖新项
 ## 工具不可用时的统一降级策略
 
 当 host 未安装 gstack 时，所有引用 /review、/qa、/ship 的步骤统一降级为：人工审查、测试命令或 CI 流程。后续各 Phase 不再重复声明此降级规则。
+
+**Superpowers 不可降级**：使用本技能时 Superpowers 插件 MUST 已安装；未安装 MUST NOT 进入 Phase 6+（见 `ref-02 § 10.6.B`）。这与 gstack 降级规则不同。
 
 ## 命令映射
 
@@ -79,7 +81,7 @@ Phase 9  发布
 Phase 10 复盘
 ```
 
-每个阶段可按需接入不同能力：例如 `spec-kit` 负责规格/方案/任务/实现骨架，`gstack` 负责方向评审、架构评审、审查、QA、发布与复盘，外部代理编排能力负责并行执行或多模型复核，Context7 MCP 负责核对上游官方文档，`gitleaks` 负责 Secret 扫描，`memory` 负责沉淀决策与踩坑记录。
+每个阶段可按需接入不同能力：例如 **Superpowers** 提供横切纪律（阶段顺序、验证铁律），`spec-kit` 负责规格/方案/任务/实现骨架，`gstack` 负责方向评审、架构评审、审查、QA、发布与复盘，外部代理编排能力负责并行执行或多模型复核，Context7 MCP 负责核对上游官方文档，`gitleaks` 负责 Secret 扫描，`memory` 负责沉淀决策与踩坑记录。
 
 ---
 
@@ -179,7 +181,7 @@ Phase 9：发布（按 Phase 9 发布链路执行）
 ① 先写失败/复现测试（固化问题，防止回归）
 ② 定位并修复
 ③ 已安装 gstack 时执行 /review（仅审改动范围）；未安装时改为人工审查或 CI 校验
-④ 确认测试通过
+④ 按 ref-09 Gate Function 确认测试通过（附 fresh 命令输出）
 ⑤ 已安装 gstack 时执行 /qa（feature branch 默认 diff-aware；需要显式模式时再加 --quick/--regression）；未安装时改为人工或 CI 验证
 ⑥ 已安装 gstack 时执行 /ship；未安装时走宿主常规发布流程
 ⑦ 踩坑追加写入 memory/issues.md
@@ -209,13 +211,14 @@ Phase 9：发布（按 Phase 9 发布链路执行）
 
 | 工具 | 升级命令 |
 |------|---------|
+| Superpowers | 各 Agent 插件市场 reinstall / `/add-plugin superpowers` |
 | gstack | `/gstack-upgrade` |
 | specify-cli（CLI） | `uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git@vX.Y.Z && uv cache clean` |
 | spec-kit 项目文件 | `specify init --here --force --integration <agent-key>` |
 | gitleaks | `brew upgrade gitleaks` |
 | oh-my-claudecode | `omc update` 或 `npm i -g oh-my-claude-sisyphus@latest`（npm 发布包名，项目品牌名相同）；刷新 config 需另跑 `omc setup`、`/setup` 或 `/omc-setup` |
 
-进入场景 E 或用户明确要求时，代理 SHOULD 按 `§ 10.6` 检查核心工具版本；默认不在每次会话开始时自动升级工具。
+进入场景 E 或用户明确要求时，代理 SHOULD 按 `§ 10.6.A` 检查能力工具版本；使用本技能时 MUST 按 `§ 10.6.B` 确认 Superpowers 已安装。默认不在每次会话开始时自动升级工具。
 
 ---
 
@@ -280,7 +283,7 @@ memory/workflow.md              ← 项目定制层（参考技能，记录本�
 |------|------|------|
 | 命令映射 | 本项目能用的具体宿主命令 | `/speckit.specify` vs `specify`，gstack 未安装时的降级路径 |
 | 文档路径 | 本项目实际文件布局 | `specs/<id>/spec.md`、`memory/decisions.md` |
-| 工具可用性 | 各工具是否安装、降级策略 | gstack 未安装 → 人工审查 / CI |
+| 工具可用性 | 各工具是否安装、降级策略 | gstack 未安装 → 人工审查 / CI；Superpowers 未安装 → 阻断 Phase 6+ |
 
 ### 模板
 
@@ -309,6 +312,7 @@ memory/workflow.md              ← 项目定制层（参考技能，记录本�
 | 工具 | 状态 | 降级策略 |
 |------|------|---------|
 | gstack | 未安装 | 人工审查 / CI |
+| Superpowers | 未安装 | 阻断 Phase 6+，先安装插件 |
 | Context7 MCP | 已配置 | 按技能规则 |
 ```
 
@@ -335,7 +339,7 @@ memory/workflow.md              ← 项目定制层（参考技能，记录本�
 
 ---
 
-### Claude Code（主力 agent，推荐）
+### Claude Code
 
 在 `~/.claude/CLAUDE.md` 末尾追加以下内容：
 
@@ -343,9 +347,11 @@ memory/workflow.md              ← 项目定制层（参考技能，记录本�
 ## AI Coding 工作流（强制遵守）
 
 1. 进行开发任务时，默认使用 `~/.claude/skills/ai-coding-workflow/SKILL.md`。
-2. “工作流”指统一的 AI Coding Workflow，按 `Phase 0~10/Phase 5B` 推进，不把 spec-kit/gstack 视为分离流程。
-3. 阶段内可按需使用 spec-kit、gstack、外部代理编排、Context7 MCP、gitleaks、memory 等能力。
-4. 意图模糊时，先判断场景：新项目/新功能/小变更/存量接入/工具升级/并行开发。
+2. “工作流”指统一的 AI Coding Workflow，按 `Phase 0~10/Phase 5B` 顺序推进，不把 spec-kit/gstack 视为分离流程。
+3. 使用本 workflow 时 Superpowers 插件 MUST 已安装；未安装不得进入 Phase 6+。
+4. Phase 退出条件未满足前不得进入下一 Phase；任何完成/通过宣称 MUST 附 fresh 验证命令输出（见技能 `ref-09-verification-gate.md`）。
+5. 阶段内可按需使用 spec-kit、gstack、Superpowers、外部代理编排、Context7 MCP、gitleaks、memory 等能力。
+6. 意图模糊时，先判断场景：新项目/新功能/小变更/存量接入/工具升级/并行开发。
 ```
 
 **验证**：新开一个对话，说「帮我做一个功能」，确认 Claude 会主动询问任务类型，而不是直接写代码。
@@ -360,28 +366,28 @@ memory/workflow.md              ← 项目定制层（参考技能，记录本�
 ## AI Coding 工作流（强制遵守）
 
 1. 进行开发任务时，默认使用 `<your-skills-path>/ai-coding-workflow/SKILL.md`。
-2. “工作流”指统一的 AI Coding Workflow，按 `Phase 0~10/Phase 5B` 推进，不把 spec-kit/gstack 视为分离流程。
-3. 阶段内可按需使用 spec-kit、gstack、外部代理编排、Context7 MCP、gitleaks、memory 等能力。
-4. 意图模糊时，先判断场景：新项目/新功能/小变更/存量接入/工具升级/并行开发。
-5. Codex CLI 中 spec-kit 使用 `$speckit-*`；当前 host 未安装的能力降级为人工审查、测试命令或 CI 流程。
+2. “工作流”指统一的 AI Coding Workflow，按 `Phase 0~10/Phase 5B` 顺序推进，不把 spec-kit/gstack 视为分离流程。
+3. 使用本 workflow 时 Superpowers 插件 MUST 已安装；未安装不得进入 Phase 6+。
+4. Phase 退出条件未满足前不得进入下一 Phase；任何完成/通过宣称 MUST 附 fresh 验证命令输出（见技能 `ref-09-verification-gate.md`）。
+5. 阶段内可按需使用 spec-kit、gstack、Superpowers、外部代理编排、Context7 MCP、gitleaks、memory 等能力。
+6. 意图模糊时，先判断场景：新项目/新功能/小变更/存量接入/工具升级/并行开发。
+7. Codex CLI 中 spec-kit 使用 `$speckit-*`；gstack 未安装时可降级为人工审查、测试命令或 CI；Superpowers 不可降级。
 ```
 
 **验证**：新开一个 Codex CLI 会话，说「帮我做一个功能」，确认会主动询问任务类型。
 
 ---
 
-### 其他 Agent 快速参考
+### 其他 Agent
 
-| Agent | 全局配置文件 | 角色定位 | 注意事项 |
-|-------|-----------|---------|---------|
-| Google Gemini CLI | `~/.gemini/GEMINI.md` | CLI 主力（辅助） | gstack/spec-kit 能力以该 host 的实际安装情况为准，未安装时走人工或 CI 替代 |
-| Cursor | `~/.cursor/rules/ai-coding-workflow.mdc` | 辅助编写 | 编码前先确认 spec.md 已存在 |
-| Windsurf | 项目级 `.windsurfrules` | 辅助编写 | 同上 |
-| GitHub Copilot | `.github/copilot-instructions.md` | 辅助编写 | 同上 |
+各 Agent 全局配置文件写入内容与上方 Claude Code 版内容块一致，将技能路径替换为实际路径；若宿主存在命令映射差异，再补充一行最小必要说明。
 
-各配置文件写入内容与上方 Claude Code 版内容块一致，将技能路径替换为实际路径；若宿主存在命令映射差异，再补充一行最小必要说明。
-
-> IDE-based agents（Cursor/Windsurf/Copilot）定位为**辅助编写角色**，负责代码补全与单文件修改；规格生成、审查、QA、发布等阶段由 Claude Code CLI 主导完成。
+| Agent | 全局配置文件 |
+|-------|-------------|
+| Google Gemini CLI | `~/.gemini/GEMINI.md` |
+| Cursor | `~/.cursor/rules/ai-coding-workflow.mdc` |
+| Windsurf | 项目级 `.windsurfrules` |
+| GitHub Copilot | `.github/copilot-instructions.md` |
 
 ---
 

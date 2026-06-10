@@ -12,12 +12,13 @@ AI Coding Workflow 以 `Phase 0~10 / 5B` 为主线推进。以下工具与角色
 
 | 层级 | 工具 | 职责 |
 |------|------|------|
-| 基础环境层 | Claude Code 原生 hooks | 自动化质量卡口、事件触发命令或 prompt/agent/http/mcp_tool handler |
+| **纪律层** | **Superpowers** | 使用 ai-coding-workflow 时**必装**；阶段顺序、完成必验证、TDD/调试纪律（横切全 Phase；见 `ref-09-verification-gate.md`） |
+| 基础环境层 | 各 Agent 原生 hooks | 自动化质量卡口、事件触发命令或 prompt/agent/http/mcp_tool handler |
 | 上下文层 | AGENTS.md + CLAUDE.md + memory/ | 项目记忆、AI 角色定义、架构决策 |
 | 文档层 | Context7 MCP | 自动查验最新库文档；无 MCP 时降级为提示词、library ID 或官方文档 |
 | 需求层 | spec-kit | 规格驱动开发，需求 → 规格 → 计划 → 任务 |
 | 外部代理层 | oh-my-claudecode | 调用 Codex / Gemini / 外部 CLI worker 并行实现或复核 |
-| 验证层 | gstack + 单元测试 | UI 验证 + 业务逻辑覆盖 |
+| 验证层 | gstack + 单元测试 | UI 验证 + 业务逻辑覆盖（未安装可降级） |
 | 沉淀层 | ADR + Checkpoint commit | 架构决策记录，知识不流失 |
 
 ### 2.2 AI 代理与模型选择
@@ -46,6 +47,7 @@ AI Coding Workflow 以 `Phase 0~10 / 5B` 为主线推进。以下工具与角色
 |------|------|
 | `spec-kit` 官方文档 / 官方仓库 | 校准 Phase 0 / 2 / 3 / 4 / 5 / 6 的规格链路顺序、核心命令与产物定义 |
 | `gstack` 官方站 / 官方仓库 | 校准 Phase 1 / 3 / 7 / 8 / 9 / 10 的评审、QA、发布、复盘类职责边界 |
+| Superpowers 官方仓库 | 校准纪律层技能（验证铁律、TDD、系统调试）与 ai-coding-workflow 的组合方式；**不替代**本 workflow 的 Phase 定义 |
 | 其他工具官方文档 / 官方仓库 | 校准外部代理编排、Context7 MCP、`gitleaks` 等阶段辅助能力的真实用法 |
 
 **规则**：
@@ -200,49 +202,81 @@ omc team 1:codex,1:gemini "compare approaches"
 
 `Claude Code`、`Codex CLI`、`Gemini CLI` 的安装步骤，以及 `CC Switch` 的 provider / model 切换说明，统一见 `ref-08-host-installation-and-cc-switch.md`。
 
-### 10.5 Secret 扫描（gitleaks）
+### 10.5 Superpowers（纪律插件，使用 ai-coding-workflow 时必装）
+
+**绑定对象**：**ai-coding-workflow 技能** — 与使用哪个 Agent / IDE **无关**。  
+**未安装时**：MUST NOT 进入 Phase 6 及之后（可先走场景 E 安装）。**不可降级**（区别于 gstack）。
+
+**职责**：横切纪律层 — 阶段顺序、完成必验证（Iron Law）、TDD/调试深化；**不替代** Phase 0~10 定义（详见 `ref-09-verification-gate.md`）。
+
+#### 安装（文档书写顺序：Claude Code → Cursor → 其他）
+
+**Claude Code**
 
 ```bash
-# 安装 / 升级
-brew install gitleaks       # 首次安装
-brew upgrade gitleaks       # 升级到最新版本
-
-# 配置 pre-commit hook（项目根目录）
-cat > .git/hooks/pre-commit << 'EOF'
-#!/bin/sh
-gitleaks git --pre-commit --staged --no-banner
-if [ $? -ne 0 ]; then
-  echo "Secret 扫描失败，提交已阻断。请检查是否有密钥泄露。"
-  exit 1
-fi
-EOF
-chmod +x .git/hooks/pre-commit
-
-# 或使用 pre-commit 框架统一管理
-# .pre-commit-config.yaml 中添加：
-# - repo: https://github.com/gitleaks/gitleaks
-#   rev: v8.x.x
-#   hooks:
-#     - id: gitleaks
+# 在 Claude Code 中安装官方插件（推荐）
+/add-plugin superpowers
 ```
 
-**规则：**
-- 任何包含 key / secret / token / password 的字符串变量 MUST 来自环境变量或 vault，MUST NOT 硬编码
-- `.env` 文件 MUST 加入 `.gitignore`；MUST 提供 `.env.example` 作为模板
-- CI 流水线 MUST 同样运行 gitleaks，作为第二道防线
+无需关心具体路径 —— 验证是否已装直接检查斜杠命令即可（见 `§ 10.6.B`）。
 
-### 10.6 工具版本检查（核心 4 件套）
+**Cursor**
 
-进入工具维护/升级场景，或用户明确要求时，代理 SHOULD 检查以下 4 个工具是否需要升级。默认不在每次会话开始时自动检查或自动升级；若升级需要网络、写权限或交互确认，则按宿主环境规范处理。其他工具（Claude Code CLI、Codex CLI、Gemini CLI 等）不在该清单范围内。
+```bash
+/add-plugin superpowers
+```
 
-**建议检查脚本（可并行执行）：**
+**其他 Agent**
+
+按该 Agent 的插件市场安装 Superpowers（或等价官方包）。若暂无官方插件，MUST 在 Phase 0 向用户说明并暂停 Phase 6+，直至安装完成。
+
+#### 与 workflow Phase 的映射（插件已装时 MAY 调用）
+
+| Superpowers 技能 | 对应 workflow 位置 | 说明 |
+|-----------------|-------------------|------|
+| `verification-before-completion` | 全 Phase（§ 13.3） | 规则已内联于 `ref-09`；插件作 reinforcement |
+| `test-driven-development` | Phase 5 / 5B | 强化红绿循环 |
+| `systematic-debugging` | Phase 5B | 先根因再改代码 |
+| `brainstorming` | Phase 1~2 | 与 `/office-hours` 等并存，不替代 spec 链路 |
+| `requesting-code-review` | Phase 7 | gstack `/review` 优先；插件作补充 |
+| `receiving-code-review` | Phase 7 修复轮次 | 不盲改 review 意见 |
+| `finishing-a-development-branch` | Phase 9 前 | 合并/PR 决策树 |
+
+> Superpowers **不同步**到 `~/.agents/skills/` 中心仓库；见 `sync-agents-npx-skills/references/agent-paths.md` 第三技能源。
+
+### 10.6 工具检查清单
+
+#### 10.6.A 能力工具（4 件套，按需检查，可降级）
+
+进入**场景 E**、工具维护场景，或用户明确要求时，代理 SHOULD 检查以下 4 个能力工具。默认不在每次会话开始时自动升级。
+
+| 工具 | 职责 | 未安装时 |
+|------|------|---------|
+| spec-kit | Phase 0~6 规格链路 | 手动 spec / 需安装 CLI |
+| gstack | Phase 1/3/7~10 评审、QA、发布 | 人工审查、测试命令、CI |
+| gitleaks | Secret 扫描 | 手动 / CI 替代 |
+| oh-my-claudecode | 外部代理编排 | 单 Agent 执行 |
+
+**gitleaks 安装 / 配置（摘录）**
+
+```bash
+brew install gitleaks       # 首次安装
+brew upgrade gitleaks       # 升级
+
+# pre-commit hook（项目根目录，示例）
+gitleaks git --pre-commit --staged --no-banner
+```
+
+**gitleaks 规则**：密钥 MUST NOT 硬编码；`.env` MUST 在 `.gitignore`；CI MUST 二次扫描。
+
+**建议版本检查脚本（可并行执行）：**
 
 ```bash
 # gstack
 ~/.claude/skills/gstack/bin/gstack-update-check --force 2>/dev/null
 ~/.codex/skills/gstack/bin/gstack-update-check --force 2>/dev/null
 
-# specify-cli（官方来自 GitHub tag，勿用 PyPI 同名包）
+# specify-cli
 uv tool list 2>/dev/null | grep specify-cli
 specify version 2>/dev/null
 specify self check 2>/dev/null
@@ -250,23 +284,44 @@ specify self check 2>/dev/null
 # gitleaks
 brew outdated gitleaks 2>/dev/null
 
-# oh-my-claudecode（npm 包名为 oh-my-claude-sisyphus）
+# oh-my-claudecode
 omc update --check 2>/dev/null
 npm view oh-my-claude-sisyphus version 2>/dev/null
 ```
 
-**升级命令（检测到更新时自动执行）：**
+**升级命令（检测到更新时）：**
 
 | 工具 | 升级命令 |
 |------|---------|
-| **gstack** | `/gstack-upgrade`（内置交互流程） |
-| **specify-cli** | `uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git@vX.Y.Z` |
-| **gitleaks** | `brew upgrade gitleaks` |
-| **oh-my-claudecode** | `omc update` 或 `npm i -g oh-my-claude-sisyphus@latest`（安装/诊断用 `omc setup`、`/setup` 或 `/omc-setup`） |
+| gstack | `/gstack-upgrade` |
+| specify-cli | `uv tool install specify-cli --force --from git+https://github.com/github/spec-kit.git@vX.Y.Z` |
+| gitleaks | `brew upgrade gitleaks` |
+| oh-my-claudecode | `omc update` 或 `npm i -g oh-my-claude-sisyphus@latest` |
 
-> gstack 升级通常带有宿主侧安装/确认流程；其余升级动作也应遵守当前宿主的权限、网络和交互约束。
->
-> Codex CLI 安装写法表示“沿用同一套 gstack 安装脚本，但放到宿主等价技能目录”；若当前宿主的技能目录或加载机制不同，应按宿主规范调整路径。
+#### 10.6.B 纪律插件（Superpowers，使用 ai-coding-workflow 时 MUST，不可降级）
+
+**检查时机**：Phase 0；每次确认按 ai-coding-workflow 推进新任务时。
+
+**检查逻辑**：检测**当前 Agent 环境**下 Superpowers 的斜杠命令 `verification-before-completion` 是否可用（与 Agent 种类无关，只问「装没装」）。
+
+```bash
+# 验证 Superpowers 是否已装 —— 只看斜杠命令 verification-before-completion 能否被加载
+# Claude Code: 运行 Skill 工具并检查报错
+# Cursor / 其他 Agent: 按对应宿主方式尝试调用该斜杠命令
+#
+# 具体执行由代理在 Phase 0 完成，方式不限：
+# - 在 Claude Code 中调用 Skill 工具以 verification-before-completion 为目标
+# - 或检查宿主是否注册了该斜杠命令（如通过 /help 或技能列表）
+#
+# 要点：不关心文件放哪，只关心 `/verification-before-completion` 能不能用。
+```
+
+| 结果 | 动作 |
+|------|------|
+| PASS（斜杠命令存在） | 继续当前 Phase |
+| FAIL（斜杠命令不可用） | 阻断 Phase 6+；提示安装 Superpowers（§ 10.5）；允许场景 E / Phase 0~5 中与安装相关的动作 |
+
+> gstack 未装 → 降级。Superpowers 未装 → **阻断**，不得用「人工验证」代替纪律插件必装要求。
 
 ---
 
@@ -283,3 +338,4 @@ npm view oh-my-claude-sisyphus version 2>/dev/null
 | hooks 配置 | https://code.claude.com/docs/en/hooks |
 | oh-my-claudecode | https://github.com/Yeachan-Heo/oh-my-claudecode |
 | gitleaks | https://github.com/gitleaks/gitleaks |
+| Superpowers | https://github.com/obra/superpowers |

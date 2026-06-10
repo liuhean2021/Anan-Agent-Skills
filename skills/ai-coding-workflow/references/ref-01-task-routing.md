@@ -8,7 +8,10 @@
 
 本文档是 AI 编程代理的行为规范。加载后须遵守以下约定：
 
-- **工具维护（按需执行）**：代理在进入工具维护/升级场景，或用户明确要求时，SHOULD 检查核心工具版本（详见 `ref-02-tool-stack.md § 10.6`）；默认不在加载文档后自动升级工具。
+- **工具维护（按需执行）**：代理在进入工具维护/升级场景，或用户明确要求时，SHOULD 检查能力工具版本（详见 `ref-02-tool-stack.md § 10.6.A`）；默认不在加载文档后自动升级工具。
+- **Superpowers 必装（使用 ai-coding-workflow 时）**：MUST 在 Phase 0 及每次确认走本 workflow 时执行 `§ 10.6.B` 检查；未安装 MUST NOT 进入 Phase 6+。与 Agent 种类无关。
+- **阶段顺序**：Phase 按 `ref-03-full-workflow.md` 文档顺序推进；当前 Phase 退出条件未满足前 MUST NOT 进入下一 Phase。详见 `ref-09-verification-gate.md § 13.2`。
+- **验证铁律**：任何完成/通过类宣称 MUST 附本消息内 freshly run 的验证命令输出。详见 `ref-09-verification-gate.md § 13.3`。
 - 规范性关键词含义：**MUST** = 强制执行；**MUST NOT** = 严禁；**SHOULD** = 强烈推荐，有正当理由可偏离；**MAY** = 可选
 - 术语定义：
   - **小功能（small change）**：单文件且非 bug fix，或 < 50 行净变更
@@ -40,7 +43,7 @@ WHEN 收到新任务时，代理 MUST 先按下表确定起始 Phase，再执行
 
 | 阶段 | 命令 | 工具 | 产出文档（精确路径） |
 |------|------|------|---------|
-| 项目初始化（一次性，在项目根目录执行） | `specify init . --integration <agent-key>` | spec-kit | `.specify/` 目录 |
+| 项目初始化（一次性，在项目根目录执行） | `specify init . --integration <agent-key>` + Superpowers 必装检查 | spec-kit + Superpowers | `.specify/` 目录 |
 | 产品方向 | `/office-hours`（问题仍模糊时）→ `/plan-ceo-review` | gstack | `specs/<feature-id>/ceo-review.md` |
 | 需求规格 | `/speckit.specify` | spec-kit | `specs/<feature-id>/spec.md` |
 | 澄清需求 | `/speckit.clarify` | spec-kit | `specs/<feature-id>/spec.md`（追加） |
