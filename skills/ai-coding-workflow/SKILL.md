@@ -71,6 +71,7 @@ Phase 0  项目初始化
 Phase 1  产品方向（支持简版）
 Phase 2  需求规格
 Phase 3  技术方案
+Phase 3.5  原型验证（可选）
 Phase 4  任务拆解
 Phase 5  一致性分析 + TDD
 Phase 5B Bug Fix 简化流

@@ -51,6 +51,7 @@ WHEN 收到新任务时，代理 MUST 先按下表确定起始 Phase，再执行
 | 前端交互设计归档（如适用） | 与规格链路同步完成 | 手动/设计工具/gstack | `specs/<feature-id>/interaction-design.md`（按 L1/L2/L3 分级填写；设计基线记录于「设计引用」章节；`design-system-context.md` MAY 降级为其中章节）；如需本地查看，临时拉取到 `specs/<feature-id>/design-assets/`（不提交 Git） |
 | 技术方案 | `/speckit.plan` | spec-kit | `specs/<feature-id>/plan.md` `specs/<feature-id>/research.md` `specs/<feature-id>/contracts/` |
 | 架构评审 | `/plan-eng-review` | gstack | `specs/<feature-id>/arch-review.md` |
+| 原型验证（可选） | 手动指导 AI 搭建原型，快速验证方向和盲区 | 手动/AI | 原型代码（不提交主仓库）、`plan.md`（追加原型验证记录） |
 | 任务拆解 | `/speckit.tasks` | spec-kit | `specs/<feature-id>/tasks.md` |
 | 转 GitHub Issues（可选） | Claude `/speckit.taskstoissues`；Codex `$speckit-taskstoissues`（tasks 后、implement 前） | spec-kit | GitHub Issues 列表 |
 | 一致性检查 | `/speckit.analyze`（在 tasks 之后） | spec-kit | — |

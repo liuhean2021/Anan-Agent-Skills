@@ -369,6 +369,7 @@ IF 方向尚未确认、MVP 边界仍在摇摆、存在"先做哪个版本"争�
 7. 将用户故事、功能边界、验收标准、约束条件写全
 7a. IF 涉及前端交互需求，THEN MUST 检查项目级 `DESIGN.md` 是否存在；IF 不存在，THEN 生成 `DESIGN.md`，遵循 Google Stitch DESIGN.md 基础格式；本工作流追加以下章节要求：`Responsive Behavior`/`Iteration Guide`；完成后 SHOULD 运行 `npx @google/design.md lint DESIGN.md` 验证。IF 存在，THEN 直接引用。为当前 feature 生成 `specs/<feature-id>/design-system-context.md`（MAY 降级为 `interaction-design.md` 中的 Design System Context 章节）。
 8. IF 涉及前端交互需求，THEN 按「前端交互需求附加规则」与「设计基线分级 gate」判定设计级别（L1/L2/L3），MUST 产出 `interaction-design.md`，并按对应级别填写模板章节
+8a. **参照物推荐**：IF 存在可参照的已有实现（本项目的、其他项目的、甚至不同语言的代码），THEN 建议直接提供给 AI 作为规格参照。一段 Rust 代码可以作为 TypeScript 项目的参考——AI 看得懂就行。将参照物来源记录到 `spec.md` 的「约束与依赖」章节中，方便后续阶段追溯设计意图。
 9. 规格确认后锁定
 
 **产出物**：`specs/<feature-id>/spec.md`、`specs/<feature-id>/checklists/`、`specs/<feature-id>/interaction-design.md`（如适用）、`specs/<feature-id>/design-system-context.md`（如适用）
@@ -511,6 +512,7 @@ IF 功能涉及多个业务概念、组件或数据对象，THEN 列出关键实
    - 回滚条件与回滚脚本（是否可逆）
    - staging dry-run 要求（Phase 9 前必须先在 staging 跑一次）
 8. **[P0-4 API 契约]** IF 本次改动新增、修改或删除对外 API（REST/GraphQL/gRPC/消息契约），THEN MUST 先更新 `specs/<feature-id>/contracts/`，再写实现代码；MUST NOT 先改实现再补契约；breaking change MUST 在 `arch-review.md` 中标注并经过 ≥1 人架构确认
+8a. **参照物推荐**：IF 存在可参照的架构设计、数据流、接口契约或完整实现代码（本项目的、其他项目的、甚至不同语言的），THEN 建议直接提供给 AI 作为方案参照。参照物的实际结构比自然语言描述更精确——AI 能从代码中理解接口粒度、数据结构、错误处理模式等纯文字难说清的细节。将参照物来源记录到 `plan.md` 的「引用文档」章节或 `research.md` 中。
 
 **产出物**：`specs/<feature-id>/plan.md`、`specs/<feature-id>/research.md`、`specs/<feature-id>/data-model.md`、`specs/<feature-id>/contracts/`、`specs/<feature-id>/arch-review.md`、`memory/decisions.md`（追加）
 
@@ -727,6 +729,31 @@ IF 功能需求较多或需要逐条追踪完成状态，THEN MAY 生成以下�
 
 ---
 
+#### Phase 3.5：原型验证（Rapid Prototyping）
+
+**定位**：本 Phase 是可选验证阶段，不是必过 Gate。它的目标是在正式实施前用最低成本确认方向可行，发现规格和方案阶段无法暴露的交互缺陷、技术盲区和视觉预期偏差。
+
+**进入条件**：WHEN 满足以下任一条件时，SHOULD 进入本 Phase：
+- 交互密集、前端复杂，或需求存在视觉/交互不确定性
+- 首次使用不熟悉的技术栈、库或工具
+- 存在多个可行方案，需要快速比较后再定
+- 用户明确要求「先试试看」
+
+IF 需求足够简单且方案成熟（纯后端逻辑、单一接口改造、已验证的模式），THEN 可跳过本 Phase。
+
+**必做动作**：
+1. 用假数据/模拟数据快速搭建最小可运行的原型，不连接真实后端、不写完整业务逻辑
+2. 验证方向：交互流转是否符合预期，方案是否存在根本缺陷，盲区是否已扫清
+3. IF 存在可参照的已有实现（本项目的、其他项目的、甚至不同语言的代码），THEN 直接提供给 AI 作为参照物——一段 Rust 代码可作为 TypeScript 项目的参考，AI 看得懂就行，这比写文字说明更有效。将参照物路径或内容记录到原型笔记中。
+4. 记录原型阶段的发现：哪些假设不成立、哪些方案不可行、哪些盲区暴露了
+5. 将结论追加到 `plan.md` 的「原型验证记录」章节，再决定正式进入 Phase 4 或返回 Phase 3 调整方案
+
+**产出物**：原型代码（不提交到主仓库）、`plan.md`（追加原型验证记录）
+
+**退出条件**：原型验证结论已记录；确认正式实施前方向无误，或基于原型发现已返回调整方案。原型代码可丢弃或保留为参考，MUST NOT 直接作为 Phase 6 实施代码。
+
+---
+
 #### Phase 4：任务拆解
 
 **进入条件**：WHEN 任务类型为小功能及以上，Phase 3 已完成。
@@ -855,6 +882,7 @@ IF 功能涉及 UI 组件、服务状态、任务生命周期、CLI 执行或多
 4. 使用外部 agent 时，MUST 先明确每个 agent 的文件所有权、输入上下文和验收条件；MUST NOT 让多个 agent 同时改同一文件
 5. 每完成一个原子任务，MUST 立即执行 `/commit-message` 生成提交信息，等待确认后再提交；MUST NOT 直接调用 `git commit` 绕过该步骤；提交信息格式以 `/commit-message` 技能定义为准，默认使用中文，除非用户明确要求英文
 6. IF 遇到问题/踩坑，THEN MUST 将内容追加写入 `memory/issues.md`
+6a. **偏差日志（推荐）**：SHOULD 在 Phase 6 开始时建立临时 `DEVIATIONS.md`，记录实施过程中与 `plan.md`/`tasks.md` 不一致的发现、临时决策、计划外上下文和意外变更。这不是正式文档，而是过程中的即兴记录，用来防止实施到一半偏离方向而不自知。Phase 6 退出时将其中有价值的内容归入 `memory/issues.md` 或 `memory/decisions.md`，然后删除 `DEVIATIONS.md`。
 7. IF 发现规格有误，THEN MUST 返回 Phase 2 正式修改，重走 Phase 3，MUST NOT 绕过
 8. IF 涉及前端交互需求，THEN 页面实现、组件开发与视觉还原 MUST 同时以 `spec.md`、`interaction-design.md`、`design-system-context.md`（或 `interaction-design.md` 中的 Design System Context 章节）、`plan.md`、`tasks.md` 为输入，按「前端交互需求附加规则」执行，MUST NOT 临场发挥、绕过设计基线，或在 Phase 6 新建/补写前端设计文档
 
