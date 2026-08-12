@@ -21,7 +21,7 @@ metadata:
 > | `references/ref-03-new-page.md` | §4 新增页面（TDD 流程、data-testid 规范） |
 > | `references/ref-04-testing.md` | §5 测试体系全集（E2E/单元/组件/视觉回归/性能/a11y/CI） |
 > | `references/ref-05-visual-verification.md` | §6 视觉验证闭环（三种方式、AI 视觉审查、设计 token 提取对比表） |
-> | `references/ref-06-ai-collaboration.md` | §7 AI 协作规范（授权矩阵、验收标准、PR 证据包） |
+> | `references/ref-06-ai-collaboration.md` | §7 AI 协作规范（授权矩阵、验收标准、PR 证据包、会话产物沉淀与经验判定标准） |
 > | `references/ref-07-scenarios-pitfalls.md` | §8 常见场景速查 + §9 避坑指南（翻车类型、框架特有坑） |
 > | `references/ref-08-tooling-prompts.md` | §10 工具配置（MCP/Hooks/playwright.config）+ 附录A Prompt 模板 + 附录B 组件提取 |
 
@@ -194,6 +194,8 @@ metadata:
 | 发现的代码模式（出现 2 次以上） | `memory/patterns.md` |
 | 项目上下文 | `CLAUDE.md` / `AGENTS.md` |
 | 可复用 prompt | `.prompts/` |
+
+> 写入 `memory/patterns.md` / `memory/issues.md` 前，先按 `references/ref-06-ai-collaboration.md §7.3` 的经验判定标准过滤：三镜头（黑话/索引/逻辑）+ 九类垃圾特征排除 + 源码事实校验 + 与历史去重合并。
 
 **AI 变更授权矩阵**（`§ 7.4`）：
 

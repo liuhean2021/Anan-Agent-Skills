@@ -131,7 +131,7 @@ WHEN 收到新任务时，代理 MUST 先按下表确定起始 Phase，再执行
 | 审查发现 | `specs/<feature-id>/review-findings.md` | 代理写入 | Phase 7 |
 | 架构决策 ADR | `memory/decisions.md` | 代理追加 | Phase 3/Phase 6 |
 | 已知问题 | `memory/issues.md` | 代理追加 | Phase 6/bug fix |
-| 项目代码模式 | `memory/patterns.md` | 代理追加 | Phase 10 |
+| 项目代码模式 | `memory/patterns.md`（写入前按 `ref-10-experience-quality.md` 判定） | 代理追加 | Phase 10 |
 | QA 报告 + 截图 | `.gstack/qa-reports/` | `/qa` 自动生成 | Phase 8 |
 | 发布日志 | `CHANGELOG.md` | `/ship` 自动生成 | Phase 9 |
 | 周复盘快照 | `.context/retros/` | `/retro` 自动生成 | Phase 10 |

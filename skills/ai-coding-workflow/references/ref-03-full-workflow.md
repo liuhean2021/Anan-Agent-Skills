@@ -956,7 +956,7 @@ IF 功能涉及 UI 组件、服务状态、任务生命周期、CLI 执行或多
 
 **必做动作**：
 1. 执行 `/retro`，生成复盘快照到 `.context/retros/`
-2. IF 有价值经验，THEN 追加写入 `memory/patterns.md`
+2. IF 有价值经验，THEN 按 `ref-10-experience-quality.md` 判定后追加写入 `memory/patterns.md`（三镜头 + 九类垃圾排除 + 与历史去重/合并；宁漏勿错）
 
 **产出物**：`.context/retros/`（快照），`memory/patterns.md`（追加）
 

@@ -105,5 +105,5 @@
 ### 6.5 功能完成后
 
 - [ ] `/retro` 周复盘（每周一次）
-- [ ] 有价值经验追加写入 `memory/patterns.md`
+- [ ] 有价值经验按 `ref-10-experience-quality.md` 判定后追加写入 `memory/patterns.md`（三镜头 + 九类垃圾排除 + 与历史去重/合并；宁漏勿错）
 - [ ] IF `AGENTS.md` 有变化：同步更新

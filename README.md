@@ -30,11 +30,11 @@ npx skills add liuhean2021/Anan-Agent-Skills
 # 全局安装（所有项目可用）
 npx skills add liuhean2021/Anan-Agent-Skills -g
 
-# 指定 Agent（如仅安装到 Claude Code）
-npx skills add liuhean2021/Anan-Agent-Skills -a claude
+# 全局安装指定 Agent（如仅安装到 Claude Code）
+npx skills add liuhean2021/Anan-Agent-Skills -a claude -g
 
-# 安装单个技能
-npx skills add liuhean2021/Anan-Agent-Skills -s ai-coding-workflow
+# 全局安装单个技能
+npx skills add liuhean2021/Anan-Agent-Skills -s ai-coding-workflow -g
 ```
 
 安装完成后 Agent 自动识别技能；含依赖的技能在首次使用时由 Agent 自行安装。

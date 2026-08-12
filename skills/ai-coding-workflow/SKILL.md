@@ -18,6 +18,7 @@ description: 当用户需要统一的 AI 编程工作流时使用，涵盖新项
 > | `references/ref-07-advanced-practices.md` | §12 进阶实践（P1 测试分层/依赖安全/DORA/Hooks；P2 AI信任边界/环境策略/合规审查/成本管理） |
 > | `references/ref-08-host-installation-and-cc-switch.md` | Claude Code/Codex/Gemini 安装 + CC Switch provider/model 切换 |
 > | `references/ref-09-verification-gate.md` | §13 验证铁律 + 阶段顺序纪律（Superpowers 横切层、Iron Law、Gate Function） |
+> | `references/ref-10-experience-quality.md` | §14 经验质量判定（三镜头 + 九类垃圾排除 + 写入前检查），`memory/patterns.md` 写入前必读 |
 
 # AI Coding 工作流
 
@@ -144,7 +145,7 @@ IF 涉及前端 UI/UX 且项目级 `DESIGN.md` 不存在，THEN 生成 `DESIGN.m
 执行审查 → QA → 按 Phase 9 发布链路进入 CI/Review/合并/staging quick QA/production。若涉及前端交互，QA MUST 将 `interaction-design.md`、`design-system-context.md`（或 `interaction-design.md` 中的 Design System Context 章节）及「设计引用」章节中的设计基线（在线链接或离线文件路径）作为对照输入之一。若 QA 发现设计效果与目标基线不一致，MUST 返回 Phase 6 修复；若基线缺失或错误，返回 Phase 2。
 
 **A7 复盘**  
-`/retro` → 有价值经验写入 `memory/patterns.md`。
+`/retro` → 有价值经验写入 `memory/patterns.md`（写入前先按 `references/ref-10-experience-quality.md` 做质量判定：三镜头 + 九类垃圾排除 + 去重合并）。
 
 ---
 
