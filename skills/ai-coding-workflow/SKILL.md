@@ -145,7 +145,7 @@ IF 涉及前端 UI/UX 且项目级 `DESIGN.md` 不存在，THEN 生成 `DESIGN.m
 执行审查 → QA → 按 Phase 9 发布链路进入 CI/Review/合并/staging quick QA/production。若涉及前端交互，QA MUST 将 `interaction-design.md`、`design-system-context.md`（或 `interaction-design.md` 中的 Design System Context 章节）及「设计引用」章节中的设计基线（在线链接或离线文件路径）作为对照输入之一。若 QA 发现设计效果与目标基线不一致，MUST 返回 Phase 6 修复；若基线缺失或错误，返回 Phase 2。
 
 **A7 复盘**  
-`/retro` → 有价值经验写入 `memory/patterns.md`（写入前先按 `references/ref-10-experience-quality.md` 做质量判定：三镜头 + 九类垃圾排除 + 去重合并）。
+`/retro` → 有价值经验写入 `memory/patterns.md`（写入前先按 `references/ref-10-experience-quality.md` 做质量判定：三镜头 + 九类垃圾排除 + 去重合并）。复盘输出末尾 MUST 执行「收尾反思两问」并如实作答：**① 眼下最没把握的是什么？② 我最大的遗漏是什么？我没意识到什么？**（前者源自 Sam Altman，后者源自 Claude；暴露本次迭代的置信度边界与盲点，不否定复盘结论）。
 
 ---
 
